@@ -124,7 +124,8 @@ const kioskApp = {
             this.state.products = products;
             this.renderMenu();
         } catch (error) {
-            console.error('Failed to load products', error);
+            console.error(error);
+            showToast("Error logging in. Please try again.", "error");
             this.menuGrid.innerHTML = `<div class="text-center text-danger py-5" style="grid-column: 1/-1;"><h3>Could not load menu. Please ask staff.</h3></div>`;
         }
     },
@@ -149,7 +150,7 @@ const kioskApp = {
             const delay = index * 0.05;
 
             // Image placeholder if undefined
-            const imgUrl = product.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60';
+            const imgUrl = product.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=fit&w=500&q=60';
 
             return `
                 <div class="product-card ${isOut ? 'out-of-stock' : 'slide-up'}" style="animation-delay: ${delay}s" onclick="${!isOut ? `kioskApp.addToCart('${product._id}')` : ''}">
@@ -298,7 +299,7 @@ const kioskApp = {
 
         } catch (error) {
             console.error('Checkout error:', error);
-            alert("Failed to submit order. Please try again.");
+            showToast("Failed to submit order. Please try again.", "error");
             this.checkoutBtn.disabled = false;
             this.checkoutBtn.innerHTML = 'Proceed to Checkout <i class="fa-solid fa-chevron-right"></i>';
         }

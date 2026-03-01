@@ -58,6 +58,19 @@ const adminApp = {
         this.newItemPrice = document.getElementById('new-item-price');
         this.newItemImage = document.getElementById('new-item-image');
         this.saveItemBtn = document.getElementById('save-item-btn');
+
+        // Edit Item Modal elements
+        this.editItemModal = document.getElementById('edit-item-modal');
+        this.closeEditModalBtn = document.getElementById('close-edit-modal');
+        this.cancelEditBtn = document.getElementById('cancel-edit-btn');
+        this.editItemForm = document.getElementById('edit-item-form');
+        this.updateItemBtn = document.getElementById('update-item-btn');
+
+        this.editItemId = document.getElementById('edit-item-id');
+        this.editItemName = document.getElementById('edit-item-name');
+        this.editItemCategory = document.getElementById('edit-item-category');
+        this.editItemPrice = document.getElementById('edit-item-price');
+        this.editItemImage = document.getElementById('edit-item-image');
     },
 
     bindEvents() {
@@ -86,20 +99,15 @@ const adminApp = {
         }
 
         // Add Item Modal
-        if (this.addItemBtn) {
-            this.addItemBtn.addEventListener('click', () => {
-                this.addItemModal.classList.remove('hidden');
-            });
-        }
-        if (this.closeAddModal) {
-            this.closeAddModal.addEventListener('click', () => {
-                this.addItemModal.classList.add('hidden');
-                this.addItemForm.reset();
-            });
-        }
-        if (this.addItemForm) {
-            this.addItemForm.addEventListener('submit', (e) => this.handleAddItem(e));
-        }
+        if (this.addBtn) this.addBtn.addEventListener('click', () => this.addItemModal.classList.add('active'));
+        if (this.closeAddModalBtn) this.closeAddModalBtn.addEventListener('click', () => this.addItemModal.classList.remove('active'));
+        if (this.cancelAddBtn) this.cancelAddBtn.addEventListener('click', () => this.addItemModal.classList.remove('active'));
+        if (this.addItemForm) this.addItemForm.addEventListener('submit', (e) => this.handleAddItem(e));
+
+        // Edit Item Modal
+        if (this.closeEditModalBtn) this.closeEditModalBtn.addEventListener('click', () => this.editItemModal.classList.remove('active'));
+        if (this.cancelEditBtn) this.cancelEditBtn.addEventListener('click', () => this.editItemModal.classList.remove('active'));
+        if (this.editItemForm) this.editItemForm.addEventListener('submit', (e) => this.handleUpdateItem(e));
 
         // Click outside to close
         document.addEventListener('click', (e) => {
@@ -219,8 +227,14 @@ const adminApp = {
     },
 
     renderOrders() {
-        if (this.state.orders.length === 0) {
-            this.ordersList.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No active orders right now.</td></tr>`;
+        if (!this.state.orders.length && this.ordersList) {
+            this.ordersList.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="fa-solid fa-receipt fa-2x mb-3" style="opacity: 0.5"></i>
+                        <p>No orders to display yet.</p>
+                    </td>
+                </tr>`;
             return;
         }
 
@@ -271,7 +285,7 @@ const adminApp = {
             }
         } catch (error) {
             console.error('Failed to update status', error);
-            alert('Failed to update status');
+            showToast('Failed to update status', 'error');
         }
     },
 
@@ -294,45 +308,65 @@ const adminApp = {
     },
 
     renderInventory() {
-        if (this.state.products.length === 0) {
-            this.inventoryList.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">No products found.</td></tr>`;
+        if (!this.state.products.length && this.inventoryList) {
+            this.inventoryList.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-muted">
+                        <i class="fa-solid fa-box-open fa-2x mb-3" style="opacity: 0.5"></i>
+                        <p>No items in inventory. Add your first product to get started.</p>
+                    </td>
+                </tr>`;
             return;
         }
 
-        this.inventoryList.innerHTML = this.state.products.map(product => {
-            const checked = !product.inStock ? 'checked' : '';
+        this.inventoryList.innerHTML = this.state.products.map(item => {
+            const checked = item.isOutOfStock ? 'checked' : '';
             return `
                 <tr>
-                    <td><strong>${product.name}</strong></td>
-                    <td>${product.category}</td>
-                    <td>${this.formatCurrency(product.price)}</td>
+                    <td><strong>${item.name}</strong></td>
+                    <td>${item.category}</td>
+                    <td>${this.formatCurrency(item.price)}</td>
                     <td>
-                        <label class="switch">
-                            <input type="checkbox" ${checked} onchange="adminApp.toggleStock('${product._id}', this.checked)">
-                            <span class="slider"></span>
-                        </label>
-                    </td>
-                </tr>
-            `;
+                            <label class="switch">
+                                <input type="checkbox" ${item.isOutOfStock ? 'checked' : ''} onchange="adminApp.toggleStock('${item._id}', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </td>
+                        <td>
+                            <div class="action-buttons" style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-sm btn-outline text-blue border-blue" onclick="adminApp.openEditModal('${item._id}')">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline text-danger border-danger" onclick="adminApp.deleteItem('${item._id}')">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
         }).join('');
     },
 
-    async toggleStock(productId, isOut) {
+    async toggleStock(id, isOutOfStock) {
         try {
-            const inStock = !isOut;
-            const res = await fetch(`${window.config.apiUrl}/products/${productId}`, {
+            const res = await fetch(`${window.config.apiUrl}/products/${id}`, {
                 method: 'PUT',
                 headers: this.getAuthHeaders(),
-                body: JSON.stringify({ inStock })
+                body: JSON.stringify({ isOutOfStock })
             });
 
             if (!res.ok) {
                 if (res.status === 401 || res.status === 403) return this.handleLogout();
-                throw new Error('Failed to update stock status');
+                throw new Error('Failed to update stock');
+            } else {
+                showToast(`Item marked as ${isOutOfStock ? 'Sold Out' : 'Available'}.`, 'info');
+                // The UI is already toggled, so we just silently update the state array
+                const item = this.state.products.find(p => p._id === id);
+                if (item) item.isOutOfStock = isOutOfStock;
             }
         } catch (error) {
             console.error(error);
-            alert('Error updating stock status');
+            showToast('Error updating stock status', 'error');
             this.fetchInventory(); // revert state visually
         }
     },
@@ -358,19 +392,102 @@ const adminApp = {
             });
 
             if (res.ok) {
-                this.addItemModal.classList.add('hidden');
                 this.addItemForm.reset();
-                this.fetchInventory(); // Refresh the list
+                this.addItemModal.classList.remove('active');
+                this.fetchInventory(); // reload
+                showToast('Product added successfully!', 'success');
             } else {
                 if (res.status === 401 || res.status === 403) return this.handleLogout();
                 throw new Error('Failed to save product');
             }
         } catch (error) {
             console.error('Add item error:', error);
-            alert('Error adding new product');
+            showToast('Error adding new product', 'error');
         } finally {
             this.saveItemBtn.disabled = false;
             this.saveItemBtn.innerHTML = 'Save Product';
+        }
+    },
+
+    openEditModal(id) {
+        const item = this.state.products.find(p => p._id === id);
+        if (!item) return;
+
+        this.editItemId.value = item._id;
+        this.editItemName.value = item.name;
+        this.editItemCategory.value = item.category;
+        this.editItemPrice.value = item.price;
+        this.editItemImage.value = item.image || '';
+
+        this.editItemModal.classList.add('active');
+    },
+
+    async handleUpdateItem(e) {
+        e.preventDefault();
+
+        const id = this.editItemId.value;
+        const name = this.editItemName.value.trim();
+        const category = this.editItemCategory.value;
+        const price = parseFloat(this.editItemPrice.value);
+        const image = this.editItemImage.value.trim();
+
+        if (!name || isNaN(price)) return;
+
+        this.updateItemBtn.disabled = true;
+        this.updateItemBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Updating...';
+
+        try {
+            // Include existing stock status so it doesn't get overridden to false accidentally
+            const existingItem = this.state.products.find(p => p._id === id);
+
+            const res = await fetch(`${window.config.apiUrl}/products/${id}`, {
+                method: 'PUT',
+                headers: this.getAuthHeaders(),
+                body: JSON.stringify({
+                    name,
+                    category,
+                    price,
+                    image,
+                    isOutOfStock: existingItem ? existingItem.isOutOfStock : false
+                })
+            });
+
+            if (res.ok) {
+                this.editItemModal.classList.remove('active');
+                this.fetchInventory();
+                showToast('Product updated successfully!', 'success');
+            } else {
+                throw new Error("Failed to update item");
+            }
+        } catch (error) {
+            console.error('Update item error:', error);
+            showToast('Error updating product', 'error');
+        } finally {
+            this.updateItemBtn.disabled = false;
+            this.updateItemBtn.innerHTML = 'Update Product';
+        }
+    },
+
+    async deleteItem(id) {
+        if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`${window.config.apiUrl}/products/${id}`, {
+                method: 'DELETE',
+                headers: this.getAuthHeaders()
+            });
+
+            if (res.ok) {
+                this.fetchInventory();
+                showToast('Product deleted successfully.', 'success');
+            } else {
+                throw new Error('Failed to delete product');
+            }
+        } catch (error) {
+            console.error('Delete item error:', error);
+            showToast('Error deleting product', 'error');
         }
     },
 

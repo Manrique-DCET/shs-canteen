@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error(error);
-            alert(`Authentication Error: ${error.message}`);
+            showToast(`Authentication Error: ${error.message}`, 'error');
             submitBtn.disabled = false;
             submitBtn.innerHTML = 'Start Ordering <i class="fa-solid fa-arrow-right"></i>';
         }

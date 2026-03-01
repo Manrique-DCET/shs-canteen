@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Login error', error);
-            alert(`Authentication Error: ${error.message}`);
+            showToast(`Authentication Error: ${error.message}`, 'error');
             submitBtn.disabled = false;
             submitBtn.innerHTML = 'Secure Login <i class="fa-solid fa-lock ml-2"></i>';
         }
