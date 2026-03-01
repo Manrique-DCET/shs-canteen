@@ -146,7 +146,7 @@ const kioskApp = {
         }
 
         this.menuGrid.innerHTML = filtered.map((product, index) => {
-            const isOut = !product.inStock;
+            const isOut = product.isOutOfStock;
             const delay = index * 0.05;
 
             // Image placeholder if undefined
@@ -176,7 +176,7 @@ const kioskApp = {
     // ==========================================
     addToCart(productId) {
         const product = this.state.products.find(p => p._id === productId);
-        if (!product || !product.inStock) return;
+        if (!product || product.isOutOfStock) return;
 
         const existingItem = this.state.cart.find(item => item._id === productId);
 
