@@ -18,13 +18,14 @@ router.get('/', async (req, res) => {
 // Create a product (Admin only)
 router.post('/', verifyToken, isAdmin, async (req, res) => {
     try {
-        const { name, category, price, image } = req.body;
+        const { name, category, price, image, isOutOfStock } = req.body;
 
         const newProduct = new Product({
             name,
             category,
             price,
-            image
+            image,
+            isOutOfStock: isOutOfStock !== undefined ? isOutOfStock : false
         });
 
         const savedProduct = await newProduct.save();

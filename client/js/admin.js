@@ -389,7 +389,7 @@ const adminApp = {
             const res = await fetch(`${window.config.apiUrl}/products`, {
                 method: 'POST',
                 headers: this.getAuthHeaders(),
-                body: JSON.stringify({ name, category, price, image })
+                body: JSON.stringify({ name, category, price, image, isOutOfStock: false })
             });
 
             if (res.ok) {
