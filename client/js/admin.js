@@ -51,7 +51,8 @@ const adminApp = {
 
         // Modal Elements
         this.addItemModal = document.getElementById('add-item-modal');
-        this.closeAddModal = document.getElementById('close-add-modal');
+        this.closeAddModalBtn = document.getElementById('close-add-modal');
+        this.cancelAddBtn = document.getElementById('cancel-add-btn');
         this.addItemForm = document.getElementById('add-item-form');
         this.newItemName = document.getElementById('new-item-name');
         this.newItemCategory = document.getElementById('new-item-category');
@@ -99,7 +100,7 @@ const adminApp = {
         }
 
         // Add Item Modal
-        if (this.addBtn) this.addBtn.addEventListener('click', () => this.addItemModal.classList.add('active'));
+        if (this.addItemBtn) this.addItemBtn.addEventListener('click', () => this.addItemModal.classList.add('active'));
         if (this.closeAddModalBtn) this.closeAddModalBtn.addEventListener('click', () => this.addItemModal.classList.remove('active'));
         if (this.cancelAddBtn) this.cancelAddBtn.addEventListener('click', () => this.addItemModal.classList.remove('active'));
         if (this.addItemForm) this.addItemForm.addEventListener('submit', (e) => this.handleAddItem(e));
