@@ -49,7 +49,7 @@ const adminApp = {
         this.logoutBtn = document.getElementById('logout-btn');
         this.addItemBtn = document.getElementById('add-item-btn');
 
-        // Modal Elements
+        // Add Item Modal Elements
         this.addItemModal = document.getElementById('add-item-modal');
         this.closeAddModalBtn = document.getElementById('close-add-modal');
         this.cancelAddBtn = document.getElementById('cancel-add-btn');
