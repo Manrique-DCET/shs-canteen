@@ -2,6 +2,7 @@ const express = require('express');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const { sendFoodReadyEmail } = require('../utils/email');
+const { verifyToken, isAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -25,20 +26,12 @@ router.post('/', async (req, res) => {
     }
 });
 
-// Get orders (If admin: get all, If student: get their own)
-router.get('/', async (req, res) => {
+// Get orders
+router.get('/', verifyToken, isAdmin, async (req, res) => {
     try {
-        const { userId, role } = req.query; // in real app, get from typical jwt auth middleware
-
-        let orders;
-        if (role === 'admin') {
-            // Admin sees active orders, optionally sort by newest
-            // Populate user info to show student name
-            orders = await Order.find().populate('user', 'name email').populate('items.product', 'name image').sort({ createdAt: -1 });
-        } else {
-            // Student sees their own orders
-            orders = await Order.find({ user: userId }).populate('items.product', 'name image');
-        }
+        // Admin sees active orders, optionally sort by newest
+        // Populate user info to show student name
+        const orders = await Order.find().populate('user', 'name email').populate('items.product', 'name image').sort({ createdAt: -1 });
 
         res.json(orders);
     } catch (err) {
@@ -48,7 +41,7 @@ router.get('/', async (req, res) => {
 });
 
 // Update order status (Admin only)
-router.put('/:id/status', async (req, res) => {
+router.put('/:id/status', verifyToken, isAdmin, async (req, res) => {
     try {
         const { status } = req.body;
 

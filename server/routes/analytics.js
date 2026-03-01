@@ -1,10 +1,11 @@
 const express = require('express');
 const Order = require('../models/Order');
 const Review = require('../models/Review');
+const { verifyToken, isAdmin } = require('../middleware/auth');
 const router = express.Router();
 
 // Get Sales & Analytics
-router.get('/', async (req, res) => {
+router.get('/', verifyToken, isAdmin, async (req, res) => {
     try {
         // 1. Calculate Total Revenue (Completed & Ready orders)
         const activeOrCompleted = await Order.find({ status: { $in: ['Ready', 'Completed'] } });

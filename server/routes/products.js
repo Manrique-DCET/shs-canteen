@@ -1,5 +1,6 @@
 const express = require('express');
 const Product = require('../models/Product');
+const { verifyToken, isAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -14,8 +15,8 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Create a product (Admin only logic placeholder)
-router.post('/', async (req, res) => {
+// Create a product (Admin only)
+router.post('/', verifyToken, isAdmin, async (req, res) => {
     try {
         const { name, category, price, image } = req.body;
 
@@ -34,8 +35,8 @@ router.post('/', async (req, res) => {
     }
 });
 
-// Update a product (Admin only logic placeholder - e.g., toggle out of stock)
-router.put('/:id', async (req, res) => {
+// Update a product (Admin only - e.g., toggle out of stock)
+router.put('/:id', verifyToken, isAdmin, async (req, res) => {
     try {
         const { name, category, price, image, isOutOfStock } = req.body;
 
@@ -58,7 +59,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete a product (Admin only)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verifyToken, isAdmin, async (req, res) => {
     try {
         const product = await Product.findByIdAndDelete(req.params.id);
         if (!product) {
