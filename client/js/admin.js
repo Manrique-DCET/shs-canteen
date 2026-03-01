@@ -40,6 +40,10 @@ const adminApp = {
         // Mobile Nav
         this.mobileNavToggle = document.getElementById('mobile-nav-toggle');
         this.sidebar = document.querySelector('.sidebar');
+
+        // Other Buttons
+        this.logoutBtn = document.getElementById('logout-btn');
+        this.addItemBtn = document.getElementById('add-item-btn');
     },
 
     bindEvents() {
@@ -57,6 +61,18 @@ const adminApp = {
             this.mobileNavToggle.addEventListener('click', () => {
                 const isOpen = this.sidebar.classList.contains('open');
                 this.toggleMobileNav(!isOpen);
+            });
+        }
+
+        if (this.logoutBtn) {
+            this.logoutBtn.addEventListener('click', () => {
+                window.location.href = 'index.html'; // Redirect to Kiosk/Login
+            });
+        }
+
+        if (this.addItemBtn) {
+            this.addItemBtn.addEventListener('click', () => {
+                alert('Add Item functionality is coming soon! For now, new items can be added directly via the database.');
             });
         }
 
