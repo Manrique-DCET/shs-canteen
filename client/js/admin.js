@@ -321,15 +321,15 @@ const adminApp = {
         }
 
         this.inventoryList.innerHTML = this.state.products.map(item => {
-            const checked = item.isOutOfStock ? 'checked' : '';
+            const isAvailable = !item.isOutOfStock; // true if available
             return `
                 <tr>
                     <td><strong>${item.name}</strong></td>
                     <td>${item.category}</td>
                     <td>${this.formatCurrency(item.price)}</td>
                     <td>
-                            <label class="switch">
-                                <input type="checkbox" ${item.isOutOfStock ? 'checked' : ''} onchange="adminApp.toggleStock('${item._id}', this.checked)">
+                            <label class="switch" title="Toggle availability">
+                                <input type="checkbox" ${isAvailable ? 'checked' : ''} onchange="adminApp.toggleStock('${item._id}', !this.checked)">
                                 <span class="slider"></span>
                             </label>
                         </td>
@@ -360,7 +360,7 @@ const adminApp = {
                 if (res.status === 401 || res.status === 403) return this.handleLogout();
                 throw new Error('Failed to update stock');
             } else {
-                showToast(`Item marked as ${isOutOfStock ? 'Sold Out' : 'Available'}.`, 'info');
+                showToast(`Item marked as ${isOutOfStock ? 'Sold Out' : 'Available'}`, 'info');
                 // The UI is already toggled, so we just silently update the state array
                 const item = this.state.products.find(p => p._id === id);
                 if (item) item.isOutOfStock = isOutOfStock;

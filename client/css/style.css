@@ -705,7 +705,9 @@ h6 {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--status-ready);
+    background-color: var(--text-muted);
+    /* Gray when OFF (Out of Stock) */
+    opacity: 0.5;
     transition: .4s;
     border-radius: 34px;
 }
@@ -724,7 +726,9 @@ h6 {
 }
 
 input:checked+.slider {
-    background-color: var(--danger);
+    background-color: var(--status-ready);
+    /* Green when ON (Available) */
+    opacity: 1;
 }
 
 input:checked+.slider:before {
