@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - UPHSL Canteen</title>
+    <meta name="description" content="Admin login for UPHSL Canteen Kiosk">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        .login-page-body {
+            background-color: var(--primary-color);
+            background-image: radial-gradient(circle at top left, rgba(212, 175, 55, 0.1), transparent 40%),
+                radial-gradient(circle at bottom right, rgba(212, 175, 55, 0.05), transparent 40%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-color);
+            margin: 0;
+            padding: 1rem;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 2.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-xl);
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .login-container h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .login-container p {
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .logo-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            font-size: 2.2rem;
+        }
+    </style>
+</head>
+
+<body class="login-page-body">
+    <div class="login-container">
+        <div class="logo-icon bg-gradient-gold">
+            <i class="fa-solid fa-shield-halved text-navy"></i>
+        </div>
+        <h2 class="text-white">Admin Access</h2>
+        <p>Please log in to manage orders and inventory.</p>
+
+        <form id="admin-login-form">
+            <div class="form-group">
+                <label class="text-white">Email Address or Username</label>
+                <input type="text" id="admin-email" class="form-control" placeholder="admin" required>
+            </div>
+            <div class="form-group mt-3">
+                <label class="text-white">Password</label>
+                <input type="password" id="admin-password" class="form-control" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg w-100 mt-4" id="login-btn">
+                Secure Login <i class="fa-solid fa-lock ml-2"></i>
+            </button>
+        </form>
+
+        <div class="text-center mt-4">
+            <a href="login.html" class="text-muted"
+                style="font-size: 0.85rem; text-decoration: none; transition: color 0.2s;">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Back to Kiosk Log In
+            </a>
+        </div>
+    </div>
+
+    <script>
+        window.config = {
+            apiUrl: 'https://shs-canteen.onrender.com/api' // Use Render backend
+        };
+    </script>
+    <script src="./js/admin-login.js"></script>
+</body>
+
+</html>

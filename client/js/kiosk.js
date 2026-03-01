@@ -19,10 +19,6 @@ const kioskApp = {
 
     cacheDOM() {
         // Auth
-        this.authOverlay = document.getElementById('auth-overlay');
-        this.loginForm = document.getElementById('student-login-form');
-        this.studentNameInput = document.getElementById('student-name');
-        this.studentEmailInput = document.getElementById('student-email');
         this.currentStudentDisplay = document.getElementById('current-student');
         this.logoutBtn = document.getElementById('student-logout-btn');
 
@@ -45,8 +41,9 @@ const kioskApp = {
 
     bindEvents() {
         // Auth
-        this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-        this.logoutBtn.addEventListener('click', () => this.handleLogout());
+        if (this.logoutBtn) {
+            this.logoutBtn.addEventListener('click', () => this.handleLogout());
+        }
 
         // Categories
         this.categoryBtns.forEach(btn => {
@@ -101,61 +98,12 @@ const kioskApp = {
         const storedUser = localStorage.getItem('canteen_student');
         if (storedUser) {
             this.state.user = JSON.parse(storedUser);
-            this.authOverlay.classList.remove('active');
-            this.currentStudentDisplay.innerHTML = `<span>Welcome, <strong>${this.state.user.name}</strong></span> <button class="btn btn-sm btn-outline ml-2" id="student-logout-btn" onclick="kioskApp.handleLogout()">Exit</button>`;
-        } else {
-            this.authOverlay.classList.add('active');
-        }
-    },
-
-    async handleLogin(e) {
-        e.preventDefault();
-        const name = this.studentNameInput.value.trim();
-        const email = this.studentEmailInput.value.trim();
-
-        if (!name || !email) return;
-
-        try {
-            // Check if user exists or create new student account
-            // For this UI demo, we'll pretend the backend handles it or we'll just mock it.
-            // Let's call the backend auth register/login route (assuming it returns user ID).
-            const res = await fetch(`${window.config.apiUrl}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password: 'password123' }) // MOCK PASS for quick flow
-            });
-
-            let userData;
-
-            if (res.ok) {
-                const data = await res.json();
-                userData = { _id: data.userId, name: data.user.name, email: data.user.email };
-            } else {
-                // If login fails (user not found), let's register them quickly
-                const regRes = await fetch(`${window.config.apiUrl}/auth/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password: 'password123', role: 'student' })
-                });
-
-                if (regRes.ok) {
-                    const data = await regRes.json();
-                    userData = { _id: data.user._id, name: data.user.name, email: data.user.email };
-                } else {
-                    throw new Error("Failed to login/register");
-                }
+            if (this.currentStudentDisplay) {
+                this.currentStudentDisplay.innerHTML = `<span>Welcome, <strong>${this.state.user.name}</strong></span> <button class="btn btn-sm btn-outline ml-2" id="student-logout-btn" onclick="kioskApp.handleLogout()">Exit</button>`;
             }
-
-            // Success
-            this.state.user = userData;
-            localStorage.setItem('canteen_student', JSON.stringify(userData));
-
-            this.authOverlay.classList.remove('active');
-            this.currentStudentDisplay.innerHTML = `<span>Welcome, <strong>${userData.name}</strong></span> <button class="btn btn-sm btn-outline ml-2" id="student-logout-btn" onclick="kioskApp.handleLogout()">Exit</button>`;
-
-        } catch (error) {
-            console.error(error);
-            alert("Error logging in. Please try again.");
+        } else {
+            // Not logged in, redirect to login page
+            window.location.href = 'login.html';
         }
     },
 
@@ -163,9 +111,7 @@ const kioskApp = {
         localStorage.removeItem('canteen_student');
         this.state.user = null;
         this.clearCart();
-        this.studentNameInput.value = '';
-        this.studentEmailInput.value = '';
-        this.authOverlay.classList.add('active');
+        window.location.href = 'login.html';
     },
 
     // ==========================================

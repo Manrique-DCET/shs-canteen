@@ -20,12 +20,7 @@ const adminApp = {
     },
 
     cacheDOM() {
-        // Auth elements
-        this.authOverlay = document.getElementById('auth-overlay');
         this.adminLayout = document.getElementById('admin-layout');
-        this.loginForm = document.getElementById('admin-login-form');
-        this.emailInput = document.getElementById('admin-email');
-        this.passwordInput = document.getElementById('admin-password');
 
         this.navItems = document.querySelectorAll('.nav-item[data-target]');
         this.panels = document.querySelectorAll('.panel');
@@ -67,9 +62,6 @@ const adminApp = {
 
     bindEvents() {
         // Auth
-        if (this.loginForm) {
-            this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-        }
         this.navItems.forEach(item => {
             item.addEventListener('click', (e) => {
                 this.switchPanel(e.currentTarget.dataset.target, e.currentTarget);
@@ -181,60 +173,17 @@ const adminApp = {
         const token = localStorage.getItem('admin_token');
         if (token) {
             this.state.token = token;
-            this.authOverlay.classList.add('hidden');
-            this.authOverlay.classList.remove('active');
-            this.adminLayout.classList.remove('hidden');
+            if (this.adminLayout) this.adminLayout.classList.remove('hidden');
             this.fetchOrders();
         } else {
-            this.authOverlay.classList.remove('hidden');
-            this.authOverlay.classList.add('active');
-            this.adminLayout.classList.add('hidden');
-        }
-    },
-
-    async handleLogin(e) {
-        e.preventDefault();
-        const email = this.emailInput.value.trim();
-        const password = this.passwordInput.value;
-
-        if (!email || !password) return;
-
-        try {
-            const res = await fetch(`${window.config.apiUrl}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                if (data.role !== 'admin') {
-                    alert('Access denied: You are not an admin.');
-                    return;
-                }
-                localStorage.setItem('admin_token', data.token);
-                this.state.token = data.token;
-
-                this.authOverlay.classList.add('hidden');
-                this.authOverlay.classList.remove('active');
-                this.adminLayout.classList.remove('hidden');
-                this.fetchOrders();
-            } else {
-                const errData = await res.json();
-                alert(errData.message || 'Login failed.');
-            }
-        } catch (error) {
-            console.error('Login error', error);
-            alert('An error occurred during login.');
+            window.location.href = 'admin-login.html';
         }
     },
 
     handleLogout() {
         localStorage.removeItem('admin_token');
         this.state.token = null;
-        this.emailInput.value = '';
-        this.passwordInput.value = '';
-        this.checkAuth();
+        window.location.href = 'admin-login.html';
     },
 
     getAuthHeaders() {

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - UPHSD Canteen</title>
+    <title>Admin Dashboard - UPHSL Canteen</title>
     <meta name="description" content="Admin dashboard for UPHSD Canteen Kiosk to manage orders and inventory">
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,38 +13,9 @@
 </head>
 
 <body class="admin-body">
-    <!-- Login Overlay -->
-    <div id="auth-overlay" class="auth-overlay active">
-        <div class="glass-card auth-card">
-            <div class="text-center mb-4">
-                <div class="logo-icon bg-gradient-gold mx-auto mb-3"
-                    style="width: 64px; height: 64px; font-size: 2rem;">
-                    <i class="fa-solid fa-lock text-navy"></i>
-                </div>
-                <h2 class="text-navy">Admin Portal</h2>
-                <p class="text-muted">Enter your credentials to access the dashboard.</p>
-            </div>
-            <form id="admin-login-form">
-                <div class="form-group">
-                    <label>Username / Email</label>
-                    <input type="text" id="admin-email" class="form-control" placeholder="admin" required>
-                </div>
-                <div class="form-group mt-3">
-                    <label>Password</label>
-                    <input type="password" id="admin-password" class="form-control" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">Login <i
-                        class="fa-solid fa-arrow-right"></i></button>
-            </form>
-            <div class="text-center mt-3">
-                <a href="index.html" class="text-muted" style="font-size: 0.8rem; text-decoration: none;">Return to
-                    Kiosk</a>
-            </div>
-        </div>
-    </div>
 
-    <!-- Main Admin Layout (hidden until login) -->
-    <div class="admin-layout hidden" id="admin-layout">
+    <!-- Main Admin Layout -->
+    <div class="admin-layout" id="admin-layout">
         <!-- Sidebar -->
         <aside class="sidebar glass-panel">
             <div class="logo-container">
