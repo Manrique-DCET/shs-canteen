@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - UPHSD Canteen</title>
+    <meta name="description" content="Admin dashboard for UPHSD Canteen Kiosk to manage orders and inventory">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="admin-body">
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="logo-container">
+                <div class="logo-icon bg-gradient-gold">
+                    <i class="fa-solid fa-utensils text-navy"></i>
+                </div>
+                <h1 class="logo-text">UPHSD<br><span class="text-gold">Canteen</span></h1>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" data-target="orders-panel">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Active Orders</span>
+                </button>
+                <button class="nav-item" data-target="inventory-panel">
+                    <i class="fa-solid fa-box-open"></i>
+                    <span>Inventory</span>
+                </button>
+                <button class="nav-item" data-target="analytics-panel">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Analytics</span>
+                </button>
+                <button class="nav-item" data-target="reviews-panel">
+                    <i class="fa-solid fa-star"></i>
+                    <span>Feedback</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="nav-item danger">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header glass-panel">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="mobile-nav-toggle btn btn-outline" id="mobile-nav-toggle" style="display: none;">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <h2 id="current-page-title">Dashboard Overview</h2>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar bg-gradient-gold text-navy">A</div>
+                    <div class="user-info">
+                        <span class="user-name">Canteen Admin</span>
+                        <span class="user-role">Administrator</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- Orders Panel -->
+                <section id="orders-panel" class="panel active slide-up">
+                    <div class="panel-header">
+                        <h3 class="section-title">Active Orders Queue</h3>
+                        <div class="panel-actions">
+                            <span class="live-indicator"><span class="dot pulse"></span> Live</span>
+                            <button class="btn btn-primary btn-sm" onclick="adminApp.fetchOrders()">
+                                <i class="fa-solid fa-rotate-right"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="glass-card table-card">
+                        <div class="table-responsive">
+                            <table class="data-table" id="orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Student</th>
+                                        <th>Items</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="orders-list">
+                                    <!-- Orders will be populated here by JS -->
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            <i class="fa-solid fa-spinner fa-spin fa-2x mb-2"></i>
+                                            <p>Loading orders...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Inventory Panel -->
+                <section id="inventory-panel" class="panel hidden">
+                    <div class="panel-header">
+                        <h3 class="section-title">Inventory Management</h3>
+                        <button class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Add Item</button>
+                    </div>
+                    <div class="glass-card table-card slide-up">
+                        <div class="table-responsive">
+                            <table class="data-table" id="inventory-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Stock Status (Ubos na!)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-list">
+                                    <!-- Products will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Analytics Panel -->
+                <section id="analytics-panel" class="panel hidden">
+                    <div class="panel-header">
+                        <h3 class="section-title">Sales & Analytics</h3>
+                    </div>
+
+                    <div class="analytics-grid">
+                        <div class="stat-card glass-card slide-up" style="animation-delay: 0.1s;">
+                            <div class="stat-icon bg-gold text-navy">
+                                <i class="fa-solid fa-peso-sign"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h4>Total Revenue</h4>
+                                <span id="total-revenue">₱0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card glass-card slide-up" style="animation-delay: 0.2s;">
+                            <div class="stat-icon bg-blue text-white">
+                                <i class="fa-solid fa-receipt"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h4>Total Orders</h4>
+                                <span id="total-orders">0</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card glass-card slide-up" style="animation-delay: 0.3s;">
+                            <div class="stat-icon bg-gold text-navy">
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h4>Avg Rating</h4>
+                                <span id="avg-rating">0.0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card table-card slide-up mt-4" style="animation-delay: 0.4s;">
+                        <h4 class="mb-3">Popular Items</h4>
+                        <div class="table-responsive">
+                            <table class="data-table" id="popular-items-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity Sold</th>
+                                        <th>Revenue Generated</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="popular-items-list">
+                                    <!-- Popular items populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Reviews Panel -->
+                <section id="reviews-panel" class="panel hidden">
+                    <div class="panel-header">
+                        <h3 class="section-title">Student Feedback</h3>
+                    </div>
+                    <div class="reviews-grid slide-up" id="reviews-container">
+                        <!-- Reviews populated here -->
+                        <div class="text-center text-muted" style="grid-column: 1 / -1; padding: 3rem;">
+                            <i class="fa-solid fa-spinner fa-spin fa-2x mb-2"></i>
+                            <p>Loading reviews...</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- API base URL configuration -->
+    <script>
+        window.config = {
+            apiUrl: 'http://localhost:5000/api'
+        };
+    </script>
+    <script src="./js/admin.js"></script>
+</body>
+
+</html>

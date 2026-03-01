@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHS Canteen Kiosk - Order Here</title>
+    <meta name="description" content="Order your meals easily at the UPHSD SHS Canteen Kiosk">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/kiosk.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="kiosk-body">
+    <!-- Login/Register Overlay (Simple implementation) -->
+    <div id="auth-overlay" class="auth-overlay active">
+        <div class="glass-card auth-card">
+            <div class="text-center mb-4">
+                <div class="logo-icon bg-gradient-gold mx-auto mb-3"
+                    style="width: 64px; height: 64px; font-size: 2rem;">
+                    <i class="fa-solid fa-utensils text-navy"></i>
+                </div>
+                <h2 class="text-navy">Welcome to<br>SHS Canteen</h2>
+                <p class="text-muted">Please enter your details to start ordering.</p>
+            </div>
+            <form id="student-login-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="student-name" class="form-control" placeholder="e.g. Juan Dela Cruz"
+                        required>
+                </div>
+                <div class="form-group mt-3">
+                    <label>Email Address</label>
+                    <input type="email" id="student-email" class="form-control" placeholder="juan@student.uphsd.edu.ph"
+                        required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">Start Ordering <i
+                        class="fa-solid fa-arrow-right"></i></button>
+            </form>
+            <div class="text-center mt-3">
+                <a href="admin.html" class="text-muted" style="font-size: 0.8rem; text-decoration: none;">Staff
+                    Login</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Kiosk Layout -->
+    <div class="kiosk-layout">
+        <!-- Main Area -->
+        <main class="kiosk-main">
+            <header class="kiosk-header glass-panel">
+                <div class="logo-container mb-0 pb-0 border-0">
+                    <h1 class="logo-text">Order <span class="text-gold">Here</span></h1>
+                </div>
+                <div class="student-profile" id="current-student">
+                    <span>Welcome, Student</span>
+                    <button class="btn btn-sm btn-outline" id="student-logout-btn">Exit</button>
+                </div>
+            </header>
+
+            <div class="categories-bar">
+                <button class="category-btn active" data-category="All">All Items</button>
+                <button class="category-btn" data-category="Meals">Meals</button>
+                <button class="category-btn" data-category="Snacks">Snacks</button>
+                <button class="category-btn" data-category="Drinks">Drinks</button>
+            </div>
+
+            <div class="menu-grid" id="menu-grid">
+                <!-- Products dynamically loaded here -->
+                <div class="text-center text-muted" style="grid-column: 1 / -1; padding: 3rem;">
+                    <i class="fa-solid fa-spinner fa-spin fa-3x mb-3 text-navy"></i>
+                    <h2>Loading delicious food...</h2>
+                </div>
+            </div>
+        </main>
+
+        <!-- Mobile Cart Toggle Button -->
+        <button class="mobile-cart-toggle" id="mobile-cart-toggle">
+            <i class="fa-solid fa-basket-shopping"></i>
+            <span class="mobile-cart-badge" id="mobile-cart-badge">0</span>
+        </button>
+
+        <!-- Cart Sidebar -->
+        <aside class="cart-sidebar glass-panel" id="cart-sidebar">
+            <div class="cart-header">
+                <h3><i class="fa-solid fa-basket-shopping"></i> Your Tray</h3>
+                <div class="cart-header-actions">
+                    <span class="badge badge-pending" id="cart-count">0 items</span>
+                    <button class="close-cart-btn" id="close-cart-btn"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+
+            <div class="cart-items" id="cart-items-container">
+                <!-- Cart empty state -->
+                <div class="empty-cart text-center text-muted mt-5">
+                    <i class="fa-solid fa-tray fa-3x mb-3"></i>
+                    <p>Your tray is empty.<br>Add some delicious food!</p>
+                </div>
+            </div>
+
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span>Total Amount</span>
+                    <h2 id="cart-total-amount" class="text-navy">₱0.00</h2>
+                </div>
+                <button class="btn btn-gold btn-lg w-100" id="checkout-btn" disabled>
+                    Proceed to Checkout <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Order Processing Modal -->
+    <div id="order-modal" class="modal-overlay hidden">
+        <div class="glass-card modal-content text-center">
+            <div id="order-status-view">
+                <div class="success-icon mb-3">
+                    <i class="fa-regular fa-circle-check text-success fa-4x"></i>
+                </div>
+                <h2 class="mb-2">Order Received!</h2>
+                <p class="mb-4 text-muted">Please wait while your food is being prepared. We will send an email when it
+                    is ready to serve.</p>
+                <div class="order-number-box mb-4 bg-gradient-navy text-white p-3 rounded">
+                    <span>Order Number</span>
+                    <h1 class="m-0 text-gold" id="display-order-id">#1024</h1>
+                </div>
+                <button class="btn btn-primary btn-lg w-100" id="close-order-modal">Return to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.config = {
+            apiUrl: 'http://localhost:5000/api'
+        };
+    </script>
+    <script src="./js/kiosk.js"></script>
+</body>
+
+</html>
