@@ -436,6 +436,23 @@
     transform: scale(0.9);
 }
 
+/* Feedback Stars */
+.star-rating {
+    display: inline-flex;
+    flex-direction: row;
+    gap: 0.25rem;
+}
+
+.star-rating i {
+    transition: color 0.2s;
+}
+
+.star-rating i:hover,
+.star-rating i.hovered,
+.star-rating i.selected {
+    color: var(--uphsd-gold) !important;
+}
+
 /* ==========================================================================
    Responsive & Mobile Styles
    ========================================================================== */

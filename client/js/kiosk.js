@@ -37,6 +37,16 @@ const kioskApp = {
         this.orderModal = document.getElementById('order-modal');
         this.displayOrderId = document.getElementById('display-order-id');
         this.closeModalBtn = document.getElementById('close-order-modal');
+
+        // Feedback Modal
+        this.feedbackBtn = document.getElementById('feedback-btn');
+        this.feedbackModal = document.getElementById('feedback-modal');
+        this.closeFeedbackBtn = document.getElementById('close-feedback-modal');
+        this.feedbackForm = document.getElementById('student-feedback-form');
+        this.stars = document.querySelectorAll('#star-rating i');
+        this.ratingInput = document.getElementById('feedback-rating');
+        this.feedbackComment = document.getElementById('feedback-comment');
+        this.submitFeedbackBtn = document.getElementById('submit-feedback-btn');
     },
 
     bindEvents() {
@@ -63,6 +73,40 @@ const kioskApp = {
             this.orderModal.classList.add('hidden');
             this.clearCart();
         });
+
+        // Feedback System
+        if (this.feedbackBtn) {
+            this.feedbackBtn.addEventListener('click', () => this.feedbackModal.classList.remove('hidden'));
+        }
+
+        if (this.closeFeedbackBtn) {
+            this.closeFeedbackBtn.addEventListener('click', () => {
+                this.feedbackModal.classList.add('hidden');
+                this.resetFeedbackForm();
+            });
+        }
+
+        // Star Rating Logic
+        this.stars.forEach(star => {
+            star.addEventListener('mouseover', (e) => {
+                const rating = e.target.dataset.rating;
+                this.highlightStars(rating);
+            });
+
+            star.addEventListener('mouseout', () => {
+                this.highlightStars(this.ratingInput.value);
+            });
+
+            star.addEventListener('click', (e) => {
+                this.ratingInput.value = e.target.dataset.rating;
+                this.highlightStars(this.ratingInput.value);
+            });
+        });
+
+        // Submit Feedback
+        if (this.feedbackForm) {
+            this.feedbackForm.addEventListener('submit', (e) => this.handleFeedbackSubmit(e));
+        }
 
         // Mobile Cart Toggle
         const mobileToggle = document.getElementById('mobile-cart-toggle');
@@ -314,6 +358,69 @@ const kioskApp = {
         // Reset button state
         this.checkoutBtn.disabled = false;
         this.checkoutBtn.innerHTML = 'Proceed to Checkout <i class="fa-solid fa-chevron-right"></i>';
+    },
+
+    // ==========================================
+    // Feedback System
+    // ==========================================
+    highlightStars(rating) {
+        this.stars.forEach(star => {
+            if (star.dataset.rating <= rating) {
+                star.classList.add('selected');
+            } else {
+                star.classList.remove('selected');
+            }
+        });
+    },
+
+    resetFeedbackForm() {
+        this.ratingInput.value = 0;
+        this.highlightStars(0);
+        this.feedbackComment.value = '';
+    },
+
+    async handleFeedbackSubmit(e) {
+        e.preventDefault();
+
+        const rating = parseInt(this.ratingInput.value);
+        const comment = this.feedbackComment.value.trim();
+
+        if (rating === 0) {
+            showToast('Please select a star rating.', 'warning');
+            return;
+        }
+
+        this.submitFeedbackBtn.disabled = true;
+        this.submitFeedbackBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+
+        try {
+            const reqBody = {
+                userId: this.state.user._id,
+                rating,
+                comment,
+                productId: null // General kiosk feedback
+            };
+
+            const res = await fetch(`${window.config.apiUrl}/reviews`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(reqBody)
+            });
+
+            if (!res.ok) throw new Error('Feedback submission failed');
+
+            showToast('Thank you for your feedback! 🌟', 'success');
+
+            this.feedbackModal.classList.add('hidden');
+            this.resetFeedbackForm();
+
+        } catch (error) {
+            console.error('Feedback error:', error);
+            showToast('Failed to submit feedback. Please try again.', 'error');
+        } finally {
+            this.submitFeedbackBtn.disabled = false;
+            this.submitFeedbackBtn.innerHTML = 'Submit Feedback';
+        }
     }
 };
 
