@@ -38,7 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (res.ok) {
                 const data = await res.json();
-                userData = { _id: data.user ? data.user.id : data.userId, name: data.user ? data.user.name : data.name, email };
+
+                // Decode the JWT to get the user ID safely
+                const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
+                userData = { _id: tokenPayload.user.id, name: data.name, email };
             } else {
                 // If login fails (user not found), register them
                 const regRes = await fetch(`${window.config.apiUrl}/auth/register`, {
