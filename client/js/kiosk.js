@@ -356,7 +356,7 @@ const kioskApp = {
         this.orderModal.classList.remove('hidden');
 
         // Reset button state
-        this.checkoutBtn.disabled = false;
+        this.checkoutBtn.disabled = true; // Still disabled if modal opens (cart is clear essentially now)
         this.checkoutBtn.innerHTML = 'Proceed to Checkout <i class="fa-solid fa-chevron-right"></i>';
     },
 

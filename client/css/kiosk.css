@@ -122,14 +122,15 @@
     padding: 0.8rem 2rem;
     border-radius: 2rem;
     border: 2px solid transparent;
-    background: white;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
     font-family: inherit;
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--text-muted);
     cursor: pointer;
     box-shadow: var(--shadow-sm);
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
 }
 
@@ -137,12 +138,13 @@
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
     color: var(--uphsd-navy);
+    background: white;
 }
 
 .category-btn.active {
     background: var(--uphsd-navy);
     color: white;
-    box-shadow: 0 4px 12px rgba(0, 35, 102, 0.2);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
 }
 
 /* Menu Grid */
@@ -159,20 +161,21 @@
 
 /* Product Card */
 .product-card {
-    background: white;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
     border-radius: var(--border-radius-md);
     overflow: hidden;
     box-shadow: var(--shadow-sm);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    border: 1px solid transparent;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(255, 255, 255, 0.8);
     position: relative;
     cursor: pointer;
 }
 
 .product-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-lg);
-    border-color: rgba(255, 215, 0, 0.5);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--shadow-xl);
+    border-color: rgba(245, 158, 11, 0.4);
 }
 
 .product-card.out-of-stock {
@@ -249,15 +252,15 @@
 .add-to-cart-btn {
     width: 100%;
     padding: 0.75rem;
-    border-radius: var(--border-radius-sm);
-    background: transparent;
-    border: 2px solid var(--uphsd-navy);
-    color: var(--uphsd-navy);
+    border-radius: 999px;
+    background: var(--bg-main);
+    border: 2px solid transparent;
+    color: var(--text-main);
     font-weight: 600;
     font-family: inherit;
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -267,6 +270,7 @@
 .product-card:hover .add-to-cart-btn {
     background: var(--uphsd-navy);
     color: white;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
 }
 
 /* Cart Sidebar */
@@ -590,6 +594,15 @@
 @media (max-width: 480px) {
     .menu-grid {
         grid-template-columns: 1fr;
+        padding: 1rem 1rem 3rem;
+    }
+
+    .categories-bar {
+        padding: 0.5rem 1rem;
+    }
+
+    .kiosk-header {
+        padding: 1rem;
     }
 
     .auth-card {
@@ -603,5 +616,10 @@
     .cart-sidebar {
         width: 100%;
         max-width: none;
+    }
+
+    .cart-item-img {
+        width: 60px;
+        height: 60px;
     }
 }

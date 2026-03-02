@@ -11,6 +11,11 @@ router.post('/', async (req, res) => {
     try {
         const { userId, items, totalAmount } = req.body;
 
+        // Basic Validation
+        if (!userId || !items || items.length === 0 || !totalAmount) {
+            return res.status(400).json({ message: 'Missing required order details' });
+        }
+
         // items should be [{ product: productId, quantity: Number, price: Number }]
         const newOrder = new Order({
             user: userId,
@@ -22,7 +27,7 @@ router.post('/', async (req, res) => {
         res.status(201).json(savedOrder);
     } catch (err) {
         console.error('Create order error:', err);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error processing order' });
     }
 });
 

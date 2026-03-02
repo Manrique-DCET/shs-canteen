@@ -304,7 +304,7 @@ const adminApp = {
             this.renderInventory();
         } catch (error) {
             console.error('Failed to fetch inventory', error);
-            this.inventoryList.innerHTML = `<tr><td colspan="4" class="text-center text-danger py-4">Failed to load inventory.</td></tr>`;
+            this.inventoryList.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">Failed to load inventory.</td></tr>`;
         }
     },
 

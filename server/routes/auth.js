@@ -40,6 +40,10 @@ router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
+        }
+
         // Check for user
         const user = await User.findOne({ email });
         if (!user) {
@@ -61,7 +65,10 @@ router.post('/login', async (req, res) => {
         };
 
         // Sign token
-        // We should use process.env.JWT_SECRET in production, but for now we fallback to 'secret'
+        if (!process.env.JWT_SECRET) {
+            console.warn('WARNING: JWT_SECRET is not defined in environment variables! Falling back to insecure secret.');
+        }
+
         jwt.sign(
             payload,
             process.env.JWT_SECRET || 'secret',
@@ -73,7 +80,7 @@ router.post('/login', async (req, res) => {
         );
     } catch (err) {
         console.error('Login error:', err);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error during login' });
     }
 });
 
