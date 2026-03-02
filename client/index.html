@@ -154,7 +154,9 @@
             const user = JSON.parse(storedUser);
             const studentDisplay = document.getElementById('current-student');
             if (studentDisplay) {
-                studentDisplay.innerHTML = `<span>Welcome, <strong>${user.name}</strong></span> <button class="btn btn-sm btn-outline ml-2" id="student-logout-btn">Log out</button>`;
+                studentDisplay.innerHTML = `<span>Welcome, <strong>${user.name}</strong></span> 
+                <button class="btn btn-sm btn-outline ml-2" id="student-logout-btn">Log out</button>
+                <button class="btn btn-sm btn-gold ml-2" id="feedback-btn"><i class="fa-solid fa-star"></i> Feedback</button>`;
             }
 
             document.addEventListener('click', (e) => {
