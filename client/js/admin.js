@@ -186,6 +186,13 @@ const adminApp = {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 this.state.user = payload.user;
+
+                // If this is an old token from before the multi-stalls update, force logout!
+                if (!this.state.user || !this.state.user.stallName) {
+                    this.handleLogout();
+                    return;
+                }
+
                 if (this.state.user && this.state.user.stallName) {
                     const titleEl = document.querySelector('title');
                     if (titleEl) titleEl.textContent = `Admin - ${this.state.user.stallName}`;

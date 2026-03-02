@@ -89,15 +89,46 @@
 </head>
 
 <body class="kiosk-body">
-    <div class="store-selection-container">
-        <h1 class="store-header">UPSHL SHS CANTEEN</h1>
+    <!-- Main Kiosk Layout -->
+    <div class="kiosk-layout" style="display: block; min-height: 100vh;">
+        <header class="kiosk-header glass-panel">
+            <div class="logo-container mb-0 pb-0 border-0">
+                <h1 class="logo-text">Store <span class="text-gold">Selection</span></h1>
+            </div>
+            <div class="student-profile" id="current-student">
+                <span>Welcome, Student</span>
+                <button class="btn btn-sm btn-outline ml-2" id="student-logout-btn">Exit</button>
+            </div>
+        </header>
 
-        <div class="stores-grid" id="stores-grid">
-            <!-- Store Cards Will Be Injected Here -->
-        </div>
+        <main class="store-selection-container" style="padding-top: 2rem;">
+            <h1 class="store-header">UPSHL SHS CANTEEN</h1>
+
+            <div class="stores-grid" id="stores-grid">
+                <!-- Store Cards Will Be Injected Here -->
+            </div>
+        </main>
     </div>
 
     <script>
+        // Check Auth
+        const storedUser = localStorage.getItem('canteen_student');
+        if (!storedUser) {
+            window.location.href = 'login.html';
+        } else {
+            const user = JSON.parse(storedUser);
+            const studentDisplay = document.getElementById('current-student');
+            if (studentDisplay) {
+                studentDisplay.innerHTML = `<span>Welcome, <strong>${user.name}</strong></span> <button class="btn btn-sm btn-outline ml-2" id="student-logout-btn">Log out</button>`;
+            }
+
+            document.addEventListener('click', (e) => {
+                if (e.target && e.target.id === 'student-logout-btn') {
+                    localStorage.removeItem('canteen_student');
+                    window.location.href = 'login.html';
+                }
+            });
+        }
         const stores = [
             "Burger and Footlong Bites",
             "Chicking Eat",
