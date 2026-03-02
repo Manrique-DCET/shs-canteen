@@ -56,8 +56,14 @@ router.put('/:id/status', verifyToken, isAdmin, async (req, res) => {
         }
 
         // Trigger email notification if status changes to 'Ready'
-        if (status === 'Ready' && order.user && order.user.email) {
-            await sendFoodReadyEmail(order.user.email, order._id, order.user.name);
+        if (status === 'Ready') {
+            console.log(`Order ${req.params.id} marked as Ready. Checking for student email...`);
+            if (order.user && order.user.email) {
+                console.log(`Sending email to ${order.user.email}...`);
+                await sendFoodReadyEmail(order.user.email, order._id, order.user.name);
+            } else {
+                console.warn(`Could not send email for order ${order._id}: User or email missing.`, order.user);
+            }
         }
 
         res.json(order);
