@@ -597,6 +597,23 @@
         padding: 1rem 1rem 3rem;
     }
 
+    /* Target mobile product cards to stack contents nicely instead of overlaying/squishing */
+    .product-card {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-image-container {
+        height: 180px;
+    }
+
+    .product-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 1rem;
+    }
+
     .categories-bar {
         padding: 0.5rem 1rem;
     }
