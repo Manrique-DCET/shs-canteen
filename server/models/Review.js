@@ -20,6 +20,10 @@ const reviewSchema = new mongoose.Schema({
     comment: {
         type: String,
         default: ''
+    },
+    stallName: {
+        type: String,
+        required: false
     }
 }, { timestamps: true });
 

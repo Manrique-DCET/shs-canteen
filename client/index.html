@@ -98,8 +98,6 @@
             <div class="student-profile" id="current-student">
                 <span>Welcome, Student</span>
                 <button class="btn btn-sm btn-outline ml-2" id="student-logout-btn">Exit</button>
-                <button class="btn btn-sm btn-gold ml-2" id="feedback-btn"><i class="fa-solid fa-star"></i>
-                    Feedback</button>
             </div>
         </header>
 
@@ -112,39 +110,6 @@
         </main>
     </div>
 
-    <!-- Student Feedback Modal -->
-    <div id="feedback-modal" class="modal-overlay hidden">
-        <div class="glass-card modal-content" style="background: white; border-radius: 1rem; padding: 2rem;">
-            <div class="modal-header d-flex justify-content-between align-items-center mb-3">
-                <h3 class="m-0">Leave Feedback</h3>
-                <button class="btn-close" id="close-feedback-modal"
-                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer;"><i
-                        class="fa-solid fa-xmark"></i></button>
-            </div>
-            <form id="student-feedback-form">
-                <div class="form-group mb-3 text-center">
-                    <label class="d-block mb-2">Rate your experience</label>
-                    <div class="star-rating" id="star-rating" style="font-size: 2rem; color: #d1d5db; cursor: pointer;">
-                        <i class="fa-solid fa-star" data-rating="1"></i>
-                        <i class="fa-solid fa-star" data-rating="2"></i>
-                        <i class="fa-solid fa-star" data-rating="3"></i>
-                        <i class="fa-solid fa-star" data-rating="4"></i>
-                        <i class="fa-solid fa-star" data-rating="5"></i>
-                    </div>
-                    <input type="hidden" id="feedback-rating" value="0" required>
-                </div>
-                <div class="form-group mb-4">
-                    <label>Comments or Suggestions?</label>
-                    <textarea id="feedback-comment" class="form-control" rows="4"
-                        placeholder="Tell us how we can improve our canteen..." style="resize: none;"></textarea>
-                </div>
-                <button type="submit" class="btn btn-gold btn-lg w-100" id="submit-feedback-btn">
-                    Submit Feedback
-                </button>
-            </form>
-        </div>
-    </div>
-
     <script>
         // Check Auth
         const storedUser = localStorage.getItem('canteen_student');
@@ -154,101 +119,13 @@
             const user = JSON.parse(storedUser);
             const studentDisplay = document.getElementById('current-student');
             if (studentDisplay) {
-                studentDisplay.innerHTML = `<span>Welcome, <strong>${user.name}</strong></span> 
-                <button class="btn btn-sm btn-outline ml-2" id="student-logout-btn">Log out</button>
-                <button class="btn btn-sm btn-gold ml-2" id="feedback-btn"><i class="fa-solid fa-star"></i> Feedback</button>`;
+                studentDisplay.innerHTML = `<span>Welcome, <strong>${user.name}</strong></span> <button class="btn btn-sm btn-outline ml-2" id="student-logout-btn">Log out</button>`;
             }
 
             document.addEventListener('click', (e) => {
                 if (e.target && e.target.id === 'student-logout-btn') {
                     localStorage.removeItem('canteen_student');
                     window.location.href = 'login.html';
-                }
-            });
-        }
-
-        // Global config
-        window.config = { apiUrl: 'https://shs-canteen.onrender.com/api' };
-
-        // Feedback Logic
-        const feedbackBtn = document.getElementById('feedback-btn');
-        const feedbackModal = document.getElementById('feedback-modal');
-        const closeFeedbackBtn = document.getElementById('close-feedback-modal');
-        const feedbackForm = document.getElementById('student-feedback-form');
-        const stars = document.querySelectorAll('#star-rating i');
-        const ratingInput = document.getElementById('feedback-rating');
-        const feedbackComment = document.getElementById('feedback-comment');
-        const submitFeedbackBtn = document.getElementById('submit-feedback-btn');
-
-        if (feedbackBtn) {
-            feedbackBtn.addEventListener('click', () => feedbackModal.classList.remove('hidden'));
-        }
-
-        if (closeFeedbackBtn) {
-            closeFeedbackBtn.addEventListener('click', () => {
-                feedbackModal.classList.add('hidden');
-                ratingInput.value = 0;
-                stars.forEach(s => s.classList.remove('selected', 'hovered'));
-                feedbackComment.value = '';
-            });
-        }
-
-        stars.forEach(star => {
-            star.addEventListener('mouseover', (e) => {
-                const rating = e.target.dataset.rating;
-                stars.forEach(s => {
-                    s.classList.toggle('hovered', s.dataset.rating <= rating);
-                });
-            });
-
-            star.addEventListener('mouseout', () => {
-                stars.forEach(s => s.classList.remove('hovered'));
-                const val = ratingInput.value;
-                stars.forEach(s => {
-                    s.classList.toggle('selected', s.dataset.rating <= val);
-                });
-            });
-
-            star.addEventListener('click', (e) => {
-                ratingInput.value = e.target.dataset.rating;
-            });
-        });
-
-        if (feedbackForm) {
-            feedbackForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const rating = parseInt(ratingInput.value);
-                const comment = feedbackComment.value.trim();
-
-                if (rating === 0) return alert('Please select a star rating.');
-
-                submitFeedbackBtn.disabled = true;
-                submitFeedbackBtn.innerHTML = 'Submitting...';
-
-                try {
-                    const reqBody = {
-                        userId: JSON.parse(storedUser)._id,
-                        rating,
-                        comment,
-                        productId: null // General canteen feedback
-                    };
-
-                    const res = await fetch(`${window.config.apiUrl}/reviews`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(reqBody)
-                    });
-
-                    if (!res.ok) throw new Error('Feedback submission failed');
-
-                    alert('Thank you for your feedback! 🌟');
-                    closeFeedbackBtn.click();
-                } catch (error) {
-                    console.error('Feedback error:', error);
-                    alert('Failed to submit feedback. Please try again.');
-                } finally {
-                    submitFeedbackBtn.disabled = false;
-                    submitFeedbackBtn.innerHTML = 'Submit Feedback';
                 }
             });
         }

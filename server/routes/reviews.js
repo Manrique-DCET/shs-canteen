@@ -5,13 +5,14 @@ const router = express.Router();
 // Submit a new review
 router.post('/', async (req, res) => {
     try {
-        const { userId, productId, rating, comment } = req.body;
+        const { userId, productId, rating, comment, stallName } = req.body;
 
         const newReview = new Review({
             user: userId,
             product: productId || null, // null implies general feedback
             rating,
-            comment
+            comment,
+            stallName
         });
 
         const savedReview = await newReview.save();

@@ -159,7 +159,15 @@ const kioskApp = {
         if (storedUser) {
             this.state.user = JSON.parse(storedUser);
             if (this.currentStudentDisplay) {
-                this.currentStudentDisplay.innerHTML = `<span>Welcome, <strong>${this.state.user.name}</strong></span> <button class="btn btn-sm btn-outline ml-2" id="student-logout-btn" onclick="kioskApp.handleLogout()">Exit</button>`;
+                this.currentStudentDisplay.innerHTML = `<span>Welcome, <strong>${this.state.user.name}</strong></span> 
+                <button class="btn btn-sm btn-outline ml-2" id="student-logout-btn" onclick="kioskApp.handleLogout()">Exit</button>
+                <button class="btn btn-sm btn-gold ml-2" id="feedback-btn"><i class="fa-solid fa-star"></i> Feedback</button>`;
+
+                // Rebind the newly created feedback button
+                this.feedbackBtn = document.getElementById('feedback-btn');
+                if (this.feedbackBtn) {
+                    this.feedbackBtn.addEventListener('click', () => this.feedbackModal.classList.remove('hidden'));
+                }
             }
         } else {
             // Not logged in, redirect to login page
@@ -415,6 +423,7 @@ const kioskApp = {
                 userId: this.state.user._id,
                 rating,
                 comment,
+                stallName: this.state.stallName, // specific stall feedback
                 productId: null // General kiosk feedback
             };
 
