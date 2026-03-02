@@ -88,9 +88,9 @@
     </style>
 </head>
 
-<body class="kiosk-body">
+<body class="kiosk-body" style="overflow-y: auto;">
     <!-- Main Kiosk Layout -->
-    <div class="kiosk-layout" style="display: block; min-height: 100vh;">
+    <div class="kiosk-layout" style="display: flex; flex-direction: column; min-height: 100vh; overflow-y: auto;">
         <header class="kiosk-header glass-panel">
             <div class="logo-container mb-0 pb-0 border-0">
                 <h1 class="logo-text">Store <span class="text-gold">Selection</span></h1>
@@ -101,7 +101,7 @@
             </div>
         </header>
 
-        <main class="store-selection-container" style="padding-top: 2rem;">
+        <main class="store-selection-container" style="padding-top: 2rem; flex: 1; overflow-y: visible;">
             <h1 class="store-header">UPSHL SHS CANTEEN</h1>
 
             <div class="stores-grid" id="stores-grid">
