@@ -28,6 +28,10 @@ const productSchema = new mongoose.Schema({
     reviewsCount: {
         type: Number,
         default: 0
+    },
+    stallName: {
+        type: String,
+        required: true
     }
 }, { timestamps: true });
 

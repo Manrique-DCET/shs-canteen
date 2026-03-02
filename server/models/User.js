@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['student', 'admin'],
         default: 'student'
+    },
+    stallName: {
+        type: String,
+        required: function () { return this.role === 'admin'; }
     }
 }, { timestamps: true });
 

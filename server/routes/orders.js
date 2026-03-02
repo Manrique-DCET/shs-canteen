@@ -9,10 +9,10 @@ const router = express.Router();
 // Create a new order (Student)
 router.post('/', async (req, res) => {
     try {
-        const { userId, items, totalAmount } = req.body;
+        const { userId, items, totalAmount, stallName } = req.body;
 
         // Basic Validation
-        if (!userId || !items || items.length === 0 || !totalAmount) {
+        if (!userId || !items || items.length === 0 || !totalAmount || !stallName) {
             return res.status(400).json({ message: 'Missing required order details' });
         }
 
@@ -20,7 +20,8 @@ router.post('/', async (req, res) => {
         const newOrder = new Order({
             user: userId,
             items,
-            totalAmount
+            totalAmount,
+            stallName
         });
 
         const savedOrder = await newOrder.save();
@@ -34,9 +35,12 @@ router.post('/', async (req, res) => {
 // Get orders
 router.get('/', verifyToken, isAdmin, async (req, res) => {
     try {
-        // Admin sees active orders, optionally sort by newest
+        // Admin sees active orders for their stall, optionally sort by newest
         // Populate user info to show student name
-        const orders = await Order.find().populate('user', 'name email').populate('items.product', 'name image').sort({ createdAt: -1 });
+        const orders = await Order.find({ stallName: req.user.stallName })
+            .populate('user', 'name email')
+            .populate('items.product', 'name image')
+            .sort({ createdAt: -1 });
 
         res.json(orders);
     } catch (err) {
@@ -50,8 +54,8 @@ router.put('/:id/status', verifyToken, isAdmin, async (req, res) => {
     try {
         const { status } = req.body;
 
-        const order = await Order.findByIdAndUpdate(
-            req.params.id,
+        const order = await Order.findOneAndUpdate(
+            { _id: req.params.id, stallName: req.user.stallName },
             { status },
             { new: true }
         ).populate('user', 'name email');

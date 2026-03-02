@@ -5,16 +5,32 @@
 const kioskApp = {
     state: {
         user: null, // { name, email }
+        stallName: null,
         products: [],
         currentCategory: 'All',
         cart: [] // { _id, name, price, quantity, img }
     },
 
     init() {
+        const params = new URLSearchParams(window.location.search);
+        this.state.stallName = params.get('stall');
+        if (!this.state.stallName) {
+            window.location.href = 'index.html';
+            return;
+        }
+
         this.cacheDOM();
+        this.updateHeader();
         this.bindEvents();
         this.checkAuth();
         this.fetchProducts();
+    },
+
+    updateHeader() {
+        const logoText = document.querySelector('.logo-text');
+        if (logoText) {
+            logoText.innerHTML = `Order <span class="text-gold">${this.state.stallName}</span>`;
+        }
     },
 
     cacheDOM() {
@@ -163,7 +179,7 @@ const kioskApp = {
     // ==========================================
     async fetchProducts() {
         try {
-            const res = await fetch(`${window.config.apiUrl}/products`);
+            const res = await fetch(`${window.config.apiUrl}/products?stall=${encodeURIComponent(this.state.stallName)}`);
             const products = await res.json();
             this.state.products = products;
             this.renderMenu();
@@ -326,7 +342,8 @@ const kioskApp = {
             const reqBody = {
                 userId: this.state.user._id,
                 items,
-                totalAmount
+                totalAmount,
+                stallName: this.state.stallName
             };
 
             const res = await fetch(`${window.config.apiUrl}/orders`, {

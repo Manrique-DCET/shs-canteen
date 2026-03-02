@@ -182,6 +182,20 @@ const adminApp = {
         const token = localStorage.getItem('admin_token');
         if (token) {
             this.state.token = token;
+
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                this.state.user = payload.user;
+                if (this.state.user && this.state.user.stallName) {
+                    const titleEl = document.querySelector('title');
+                    if (titleEl) titleEl.textContent = `Admin - ${this.state.user.stallName}`;
+                    const headerEl = document.querySelector('.sidebar h2');
+                    if (headerEl) headerEl.innerHTML = `<i class="fa-solid fa-store" style="font-size: 1.5rem; margin-right: 0.5rem;"></i> ${this.state.user.stallName}`;
+                }
+            } catch (e) {
+                console.error("Could not parse token payload", e);
+            }
+
             if (this.adminLayout) this.adminLayout.classList.remove('hidden');
             this.fetchOrders();
         } else {

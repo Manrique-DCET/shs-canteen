@@ -7,7 +7,11 @@ const router = express.Router();
 // Get all products (for students & admin)
 router.get('/', async (req, res) => {
     try {
-        const products = await Product.find();
+        const filter = {};
+        if (req.query.stall) {
+            filter.stallName = req.query.stall;
+        }
+        const products = await Product.find(filter);
         res.json(products);
     } catch (err) {
         console.error('Fetch products error:', err);
@@ -25,7 +29,8 @@ router.post('/', verifyToken, isAdmin, async (req, res) => {
             category,
             price,
             image,
-            isOutOfStock: isOutOfStock !== undefined ? isOutOfStock : false
+            isOutOfStock: isOutOfStock !== undefined ? isOutOfStock : false,
+            stallName: req.user.stallName
         });
 
         const savedProduct = await newProduct.save();
@@ -41,9 +46,9 @@ router.put('/:id', verifyToken, isAdmin, async (req, res) => {
     try {
         const { name, category, price, image, isOutOfStock } = req.body;
 
-        // Find and update
-        const product = await Product.findByIdAndUpdate(
-            req.params.id,
+        // Find and update, ensuring admin owns context
+        const product = await Product.findOneAndUpdate(
+            { _id: req.params.id, stallName: req.user.stallName },
             { name, category, price, image, isOutOfStock },
             { new: true } // Return updated document
         );
@@ -62,7 +67,7 @@ router.put('/:id', verifyToken, isAdmin, async (req, res) => {
 // Delete a product (Admin only)
 router.delete('/:id', verifyToken, isAdmin, async (req, res) => {
     try {
-        const product = await Product.findByIdAndDelete(req.params.id);
+        const product = await Product.findOneAndDelete({ _id: req.params.id, stallName: req.user.stallName });
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }

@@ -32,6 +32,10 @@ const orderSchema = new mongoose.Schema({
         type: String,
         enum: ['Pending', 'Preparing', 'Ready', 'Completed'],
         default: 'Pending'
+    },
+    stallName: {
+        type: String,
+        required: true
     }
 }, { timestamps: true });
 
