@@ -1,5 +1,3 @@
-const { Resend } = require('resend');
-
 const sendFoodReadyEmail = async (studentEmail, orderId, studentName) => {
   try {
     console.log(`Attempting to send email via EmailJS to ${studentEmail} for order ${orderId}...`);
