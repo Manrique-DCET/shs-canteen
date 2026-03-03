@@ -206,9 +206,10 @@ const kioskApp = {
 
         if (filtered.length === 0) {
             this.menuGrid.innerHTML = `
-                <div class="text-center text-muted col-span-full py-5" style="grid-column: 1/-1;">
-                    <i class="fa-solid fa-utensils fa-3x mb-3"></i>
-                    <h3>No items found in this category.</h3>
+                <div class="text-center text-muted col-span-full py-5 fade-in" style="grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; margin-top: 3rem;">
+                    <i class="fa-solid fa-store-slash fa-4x mb-4 text-navy" style="opacity: 0.5;"></i>
+                    <h2 class="text-navy">No items available yet</h2>
+                    <p class="text-muted mt-2">This store hasn't added any menu items or they are currently sold out.</p>
                 </div>`;
             return;
         }
@@ -218,7 +219,7 @@ const kioskApp = {
             const delay = index * 0.05;
 
             // Image placeholder if undefined
-            const imgUrl = product.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=fit&w=500&q=60';
+            const imgUrl = product.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60';
 
             return `
                 <div class="product-card ${isOut ? 'out-of-stock' : 'slide-up'}" style="animation-delay: ${delay}s" onclick="${!isOut ? `kioskApp.addToCart('${product._id}')` : ''}">
@@ -303,9 +304,9 @@ const kioskApp = {
 
         if (this.state.cart.length === 0) {
             this.cartItemsContainer.innerHTML = `
-                <div class="empty-cart text-center text-muted mt-5 fade-in">
-                    <i class="fa-solid fa-tray fa-3x mb-3 text-gold"></i>
-                    <p>Your tray is empty.<br>Add some delicious food!</p>
+                <div class="empty-cart text-center text-muted mt-5 fade-in" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+                    <i class="fa-solid fa-tray fa-4x mb-4 text-gold"></i>
+                    <p style="font-size: 1.1rem;">Your tray is empty.<br>Add some delicious food!</p>
                 </div>
             `;
             return;
