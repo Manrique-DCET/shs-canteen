@@ -8,11 +8,14 @@ const router = express.Router();
 router.get('/', verifyToken, isAdmin, async (req, res) => {
     try {
         // 1. Calculate Total Revenue (Completed & Ready orders)
-        const activeOrCompleted = await Order.find({ status: { $in: ['Ready', 'Completed'] } });
+        const activeOrCompleted = await Order.find({
+            stallName: req.user.stallName,
+            status: { $in: ['Ready', 'Completed'] }
+        });
         const totalRevenue = activeOrCompleted.reduce((sum, order) => sum + order.totalAmount, 0);
 
         // 2. Popular Items
-        const allOrders = await Order.find().populate('items.product', 'name');
+        const allOrders = await Order.find({ stallName: req.user.stallName }).populate('items.product', 'name');
         const itemCounts = {};
 
         allOrders.forEach(order => {
@@ -31,7 +34,7 @@ router.get('/', verifyToken, isAdmin, async (req, res) => {
             .slice(0, 5); // top 5
 
         // 3. Average General Rating (Feedback)
-        const reviews = await Review.find({ product: null });
+        const reviews = await Review.find({ stallName: req.user.stallName, product: null });
         const avgRating = reviews.length > 0
             ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
             : 0;

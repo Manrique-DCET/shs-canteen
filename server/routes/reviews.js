@@ -26,10 +26,13 @@ router.post('/', async (req, res) => {
 // Fetch reviews (optionally filter by product)
 router.get('/', async (req, res) => {
     try {
-        const { productId } = req.query;
+        const { productId, stall } = req.query;
         let filter = {};
         if (productId) {
             filter.product = productId;
+        }
+        if (stall) {
+            filter.stallName = stall;
         }
 
         const reviews = await Review.find(filter)

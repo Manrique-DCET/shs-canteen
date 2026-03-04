@@ -318,7 +318,11 @@ const adminApp = {
         try {
             this.inventoryList.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin fa-2x mb-2"></i><p>Loading inventory...</p></td></tr>`;
 
-            const res = await fetch(`${window.config.apiUrl}/products`);
+            const stallParam = this.state.user && this.state.user.stallName
+                ? `?stall=${encodeURIComponent(this.state.user.stallName)}`
+                : '';
+
+            const res = await fetch(`${window.config.apiUrl}/products${stallParam}`);
             const products = await res.json();
             this.state.products = products;
 
@@ -555,7 +559,11 @@ const adminApp = {
         try {
             this.reviewsContainer.innerHTML = `<div class="text-center text-muted" style="grid-column: 1 / -1; padding: 3rem;"><i class="fa-solid fa-spinner fa-spin fa-2x mb-2"></i><p>Loading reviews...</p></div>`;
 
-            const res = await fetch(`${window.config.apiUrl}/reviews`, {
+            const stallParam = this.state.user && this.state.user.stallName
+                ? `?stall=${encodeURIComponent(this.state.user.stallName)}`
+                : '';
+
+            const res = await fetch(`${window.config.apiUrl}/reviews${stallParam}`, {
                 headers: this.getAuthHeaders()
             });
             if (res.status === 401 || res.status === 403) return this.handleLogout();
