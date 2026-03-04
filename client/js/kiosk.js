@@ -24,6 +24,35 @@ const kioskApp = {
         this.bindEvents();
         this.checkAuth();
         this.fetchProducts();
+        this.initSocket();
+    },
+
+    initSocket() {
+        if (!this.state.user || !this.state.user._id) return;
+
+        // Initialize Socket.io connection
+        const socketUrl = window.config.apiUrl.replace('/api', '');
+        this.socket = io(socketUrl);
+
+        // Join the student's specific room to listen for status changes
+        this.socket.on('connect', () => {
+            console.log('Connected to WebSocket server');
+            this.socket.emit('joinStudent', this.state.user._id);
+        });
+
+        // Listen for order status updates
+        this.socket.on('orderStatusChanged', (data) => {
+            console.log('Order status updated via WebSocket:', data);
+
+            // Extract last 4 chars for matching our UI
+            const shortId = data.orderId.substring(data.orderId.length - 4).toUpperCase();
+
+            if (data.status === 'Ready') {
+                showToast(`Order #${shortId} from ${data.stallName} is Ready! 🥳`, 'success');
+            } else if (data.status === 'Preparing') {
+                showToast(`Order #${shortId} is now being prepared! 👨‍🍳`, 'info');
+            }
+        });
     },
 
     updateHeader() {
@@ -187,8 +216,7 @@ const kioskApp = {
     // ==========================================
     async fetchProducts() {
         try {
-            const res = await fetch(`${window.config.apiUrl}/products?stall=${encodeURIComponent(this.state.stallName)}`);
-            const products = await res.json();
+            const products = await api.request(`/products?stall=${encodeURIComponent(this.state.stallName)}`);
             this.state.products = products;
             this.renderMenu();
         } catch (error) {
@@ -355,15 +383,10 @@ const kioskApp = {
                 stallName: this.state.stallName
             };
 
-            const res = await fetch(`${window.config.apiUrl}/orders`, {
+            const orderData = await api.request(`/orders`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(reqBody)
             });
-
-            if (!res.ok) throw new Error('Order submission failed');
-
-            const orderData = await res.json();
 
             this.showOrderSuccess(orderData._id);
 
@@ -428,13 +451,10 @@ const kioskApp = {
                 productId: null // General kiosk feedback
             };
 
-            const res = await fetch(`${window.config.apiUrl}/reviews`, {
+            await api.request(`/reviews`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(reqBody)
             });
-
-            if (!res.ok) throw new Error('Feedback submission failed');
 
             showToast('Thank you for your feedback! 🌟', 'success');
 

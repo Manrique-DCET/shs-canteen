@@ -17,6 +17,31 @@ const adminApp = {
         this.cacheDOM();
         this.bindEvents();
         this.checkAuth();
+        this.initSocket();
+    },
+
+    initSocket() {
+        if (!this.state.user || !this.state.user.stallName) return;
+
+        // Initialize Socket.io connection
+        const socketUrl = window.config.apiUrl.replace('/api', '');
+        this.socket = io(socketUrl);
+
+        // Join the stall's specific room to listen for new orders
+        this.socket.on('connect', () => {
+            console.log('Connected to WebSocket server');
+            this.socket.emit('joinStall', this.state.user.stallName);
+        });
+
+        // Listen for new orders
+        this.socket.on('newOrder', (order) => {
+            console.log('New order received via WebSocket:', order);
+            showToast('New Order Received! 🔔', 'info');
+
+            // Unshift the order to the beginning of the list
+            this.state.orders.unshift(order);
+            this.renderOrders();
+        });
     },
 
     cacheDOM() {
@@ -119,12 +144,12 @@ const adminApp = {
             }
         });
 
-        // Auto-refresh orders every 30 seconds
+        // Auto-refresh orders every 30 seconds (Kept as fallback just in case WS drops)
         setInterval(() => {
             if (this.state.activePanel === 'orders-panel') {
                 this.fetchOrders(true); // silent refresh
             }
-        }, 30000);
+        }, 60000); // Changed to 1 min instead of 30s since we have WebSockets
     },
 
     toggleMobileNav(show) {
@@ -232,11 +257,7 @@ const adminApp = {
                 this.ordersList.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin fa-2x mb-2"></i><p>Loading orders...</p></td></tr>`;
             }
 
-            const res = await fetch(`${window.config.apiUrl}/orders?role=admin`, {
-                headers: this.getAuthHeaders()
-            });
-            if (res.status === 401 || res.status === 403) return this.handleLogout();
-            const orders = await res.json();
+            const orders = await api.request(`/orders?role=admin`, {}, true);
             this.state.orders = orders;
 
             this.renderOrders();
@@ -288,22 +309,19 @@ const adminApp = {
 
     async updateOrderStatus(orderId, newStatus) {
         try {
-            const res = await fetch(`${window.config.apiUrl}/orders/${orderId}/status`, {
+            await api.request(`/orders/${orderId}/status`, {
                 method: 'PUT',
-                headers: this.getAuthHeaders(),
                 body: JSON.stringify({ status: newStatus })
-            });
+            }, true);
 
-            if (res.ok) {
-                // Optimistic update
-                const order = this.state.orders.find(o => o._id === orderId);
-                if (order) order.status = newStatus;
-                this.renderOrders();
+            // Optimistic update
+            const order = this.state.orders.find(o => o._id === orderId);
+            if (order) order.status = newStatus;
+            this.renderOrders();
 
-                // If marked as ready, show a subtle notification that email was sent
-                if (newStatus === 'Ready') {
-                    console.log('Email notification triggered for order', orderId);
-                }
+            // If marked as ready, show a subtle notification that email was sent
+            if (newStatus === 'Ready') {
+                console.log('Email notification triggered for order', orderId);
             }
         } catch (error) {
             console.error('Failed to update status', error);
@@ -322,8 +340,7 @@ const adminApp = {
                 ? `?stall=${encodeURIComponent(this.state.user.stallName)}`
                 : '';
 
-            const res = await fetch(`${window.config.apiUrl}/products${stallParam}`);
-            const products = await res.json();
+            const products = await api.request(`/products${stallParam}`, {}, true);
             this.state.products = products;
 
             this.renderInventory();
@@ -375,21 +392,15 @@ const adminApp = {
 
     async toggleStock(id, isOutOfStock) {
         try {
-            const res = await fetch(`${window.config.apiUrl}/products/${id}`, {
+            await api.request(`/products/${id}`, {
                 method: 'PUT',
-                headers: this.getAuthHeaders(),
                 body: JSON.stringify({ isOutOfStock })
-            });
+            }, true);
 
-            if (!res.ok) {
-                if (res.status === 401 || res.status === 403) return this.handleLogout();
-                throw new Error('Failed to update stock');
-            } else {
-                showToast(`Item marked as ${isOutOfStock ? 'Sold Out' : 'Available'}`, 'info');
-                // The UI is already toggled, so we just silently update the state array
-                const item = this.state.products.find(p => p._id === id);
-                if (item) item.isOutOfStock = isOutOfStock;
-            }
+            showToast(`Item marked as ${isOutOfStock ? 'Sold Out' : 'Available'}`, 'info');
+            // The UI is already toggled, so we just silently update the state array
+            const item = this.state.products.find(p => p._id === id);
+            if (item) item.isOutOfStock = isOutOfStock;
         } catch (error) {
             console.error(error);
             showToast('Error updating stock status', 'error');
@@ -411,21 +422,15 @@ const adminApp = {
         this.saveItemBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
         try {
-            const res = await fetch(`${window.config.apiUrl}/products`, {
+            await api.request(`/products`, {
                 method: 'POST',
-                headers: this.getAuthHeaders(),
                 body: JSON.stringify({ name, category, price, image, isOutOfStock: false })
-            });
+            }, true);
 
-            if (res.ok) {
-                this.addItemForm.reset();
-                this.addItemModal.classList.remove('active');
-                this.fetchInventory(); // reload
-                showToast('Product added successfully!', 'success');
-            } else {
-                if (res.status === 401 || res.status === 403) return this.handleLogout();
-                throw new Error('Failed to save product');
-            }
+            this.addItemForm.reset();
+            this.addItemModal.classList.remove('active');
+            this.fetchInventory(); // reload
+            showToast('Product added successfully!', 'success');
         } catch (error) {
             console.error('Add item error:', error);
             showToast('Error adding new product', 'error');
@@ -466,9 +471,8 @@ const adminApp = {
             // Include existing stock status so it doesn't get overridden to false accidentally
             const existingItem = this.state.products.find(p => p._id === id);
 
-            const res = await fetch(`${window.config.apiUrl}/products/${id}`, {
+            await api.request(`/products/${id}`, {
                 method: 'PUT',
-                headers: this.getAuthHeaders(),
                 body: JSON.stringify({
                     name,
                     category,
@@ -476,15 +480,11 @@ const adminApp = {
                     image,
                     isOutOfStock: existingItem ? existingItem.isOutOfStock : false
                 })
-            });
+            }, true);
 
-            if (res.ok) {
-                this.editItemModal.classList.remove('active');
-                this.fetchInventory();
-                showToast('Product updated successfully!', 'success');
-            } else {
-                throw new Error("Failed to update item");
-            }
+            this.editItemModal.classList.remove('active');
+            this.fetchInventory();
+            showToast('Product updated successfully!', 'success');
         } catch (error) {
             console.error('Update item error:', error);
             showToast('Error updating product', 'error');
@@ -500,17 +500,12 @@ const adminApp = {
         }
 
         try {
-            const res = await fetch(`${window.config.apiUrl}/products/${id}`, {
-                method: 'DELETE',
-                headers: this.getAuthHeaders()
-            });
+            await api.request(`/products/${id}`, {
+                method: 'DELETE'
+            }, true);
 
-            if (res.ok) {
-                this.fetchInventory();
-                showToast('Product deleted successfully.', 'success');
-            } else {
-                throw new Error('Failed to delete product');
-            }
+            this.fetchInventory();
+            showToast('Product deleted successfully.', 'success');
         } catch (error) {
             console.error('Delete item error:', error);
             showToast('Error deleting product', 'error');
@@ -522,11 +517,7 @@ const adminApp = {
     // ==========================================
     async fetchAnalytics() {
         try {
-            const res = await fetch(`${window.config.apiUrl}/analytics`, {
-                headers: this.getAuthHeaders()
-            });
-            if (res.status === 401 || res.status === 403) return this.handleLogout();
-            const data = await res.json();
+            const data = await api.request(`/analytics`, {}, true);
             this.state.analytics = data;
 
             // Update Top KPIs
@@ -563,11 +554,7 @@ const adminApp = {
                 ? `?stall=${encodeURIComponent(this.state.user.stallName)}`
                 : '';
 
-            const res = await fetch(`${window.config.apiUrl}/reviews${stallParam}`, {
-                headers: this.getAuthHeaders()
-            });
-            if (res.status === 401 || res.status === 403) return this.handleLogout();
-            const reviews = await res.json();
+            const reviews = await api.request(`/reviews${stallParam}`, {}, true);
             this.state.reviews = reviews;
 
             if (reviews.length === 0) {

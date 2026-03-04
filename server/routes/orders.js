@@ -7,13 +7,18 @@ const { verifyToken, isAdmin } = require('../middleware/auth');
 const router = express.Router();
 
 // Create a new order (Student)
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
     try {
         const { userId, items, totalAmount, stallName } = req.body;
 
         // Basic Validation
         if (!userId || !items || items.length === 0 || !totalAmount || !stallName) {
             return res.status(400).json({ message: 'Missing required order details' });
+        }
+
+        // Validate the authenticated user matches the userId in the body
+        if (req.user.id !== userId) {
+            return res.status(403).json({ message: 'Unauthorized order placement' });
         }
 
         // items should be [{ product: productId, quantity: Number, price: Number }]
@@ -25,6 +30,16 @@ router.post('/', async (req, res) => {
         });
 
         const savedOrder = await newOrder.save();
+
+        // Emit newOrder event to the specific stall's room
+        const io = req.app.get('io');
+        if (io) {
+            // Populate the user before sending to mimic the existing payload
+            await savedOrder.populate('user', 'name email');
+            await savedOrder.populate('items.product', 'name image');
+            io.to(`stall_${stallName}`).emit('newOrder', savedOrder);
+        }
+
         res.status(201).json(savedOrder);
     } catch (err) {
         console.error('Create order error:', err);
@@ -73,6 +88,17 @@ router.put('/:id/status', verifyToken, isAdmin, async (req, res) => {
             } else {
                 console.warn(`Could not send email for order ${order._id}: User or email missing.`, order.user);
             }
+        }
+
+        // Emit orderStatusChanged event via WebSockets
+        const io = req.app.get('io');
+        if (io && order.user) {
+            // Emitting to the specific student's room
+            io.to(`student_${order.user._id}`).emit('orderStatusChanged', {
+                orderId: order._id,
+                status: status,
+                stallName: order.stallName
+            });
         }
 
         res.json(order);

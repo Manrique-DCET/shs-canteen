@@ -27,26 +27,19 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
 
         try {
-            const res = await fetch(`${window.config.apiUrl}/auth/login`, {
+            const data = await api.request(`/auth/login`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
 
-            if (res.ok) {
-                const data = await res.json();
-
-                // Extra safety check: Are they actually an admin?
-                if (data.role !== 'admin') {
-                    throw new Error('Access denied: You are not an administrator.');
-                }
-
-                localStorage.setItem('admin_token', data.token);
-                window.location.href = 'admin.html';
-            } else {
-                const errData = await res.json();
-                throw new Error(errData.message || 'Invalid credentials.');
+            // Extra safety check: Are they actually an admin?
+            if (data.role !== 'admin') {
+                throw new Error('Access denied: You are not an administrator.');
             }
+
+            localStorage.setItem('admin_token', data.token);
+            window.location.href = 'admin.html';
+
         } catch (error) {
             console.error('Login error', error);
             showToast(`Authentication Error: ${error.message}`, 'error');

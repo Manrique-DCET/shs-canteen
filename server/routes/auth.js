@@ -28,7 +28,29 @@ router.post('/register', async (req, res) => {
         });
 
         await newUser.save();
-        res.status(201).json({ message: 'User registered successfully' });
+
+        // Create JWT payload
+        const payload = {
+            user: {
+                id: newUser.id,
+                role: newUser.role,
+                stallName: newUser.stallName
+            }
+        };
+
+        if (!process.env.JWT_SECRET) {
+            console.warn('WARNING: JWT_SECRET is not defined in environment variables! Falling back to insecure secret.');
+        }
+
+        jwt.sign(
+            payload,
+            process.env.JWT_SECRET || 'secret',
+            { expiresIn: '1d' },
+            (err, token) => {
+                if (err) throw err;
+                res.status(201).json({ message: 'User registered successfully', token, role: newUser.role, name: newUser.name });
+            }
+        );
     } catch (err) {
         console.error('Registration error:', err);
         res.status(500).json({ message: 'Server error' });

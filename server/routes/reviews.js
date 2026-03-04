@@ -1,11 +1,16 @@
 const express = require('express');
 const Review = require('../models/Review');
+const { verifyToken } = require('../middleware/auth');
 const router = express.Router();
 
 // Submit a new review
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
     try {
         const { userId, productId, rating, comment, stallName } = req.body;
+
+        if (req.user.id !== userId) {
+            return res.status(403).json({ message: 'Unauthorized review submission' });
+        }
 
         const newReview = new Review({
             user: userId,
