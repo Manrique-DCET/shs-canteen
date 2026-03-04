@@ -221,7 +221,7 @@ const kioskApp = {
             this.renderMenu();
         } catch (error) {
             console.error(error);
-            showToast("Error logging in. Please try again.", "error");
+            showToast("Error loading menu. Please try again later.", "error");
             this.menuGrid.innerHTML = `<div class="text-center text-danger py-5" style="grid-column: 1/-1;"><h3>Could not load menu. Please ask staff.</h3></div>`;
         }
     },
