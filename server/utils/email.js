@@ -2,7 +2,8 @@ const sendFoodReadyEmail = async (studentEmail, orderId, studentName) => {
   try {
     console.log(`Attempting to send email via EmailJS to ${studentEmail} for order ${orderId}...`);
 
-    const shortOrderId = orderId.substring(orderId.length - 6).toUpperCase();
+    const orderIdStr = String(orderId);
+    const shortOrderId = orderIdStr.substring(orderIdStr.length - 6).toUpperCase();
 
     // The EmailJS REST API payload
     const payload = {
