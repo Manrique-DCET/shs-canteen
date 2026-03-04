@@ -1,57 +1,37 @@
 const sendFoodReadyEmail = async (studentEmail, orderId, studentName) => {
   try {
-    console.log(`Attempting to send email via Brevo to ${studentEmail} for order ${orderId}...`);
-
-    const apiKey = process.env.BREVO_API_KEY;
-
-    if (!apiKey) {
-      throw new Error('Missing BREVO_API_KEY environment variable');
-    }
+    console.log(`Attempting to send email via EmailJS to ${studentEmail} for order ${orderId}...`);
 
     const shortOrderId = orderId.substring(orderId.length - 6).toUpperCase();
 
-    const senderEmail = process.env.SENDER_EMAIL || "noreply@shscanteen.com";
-
+    // The EmailJS REST API payload
     const payload = {
-      sender: {
-        name: "SHS Canteen",
-        email: senderEmail // Must be a verified sender email in your Brevo account
-      },
-      to: [
-        {
-          email: studentEmail,
-          name: studentName
-        }
-      ],
-      subject: `Your Order #${shortOrderId} is Ready!`,
-      htmlContent: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 8px;">
-          <h2 style="color: #2c3e50;">Hello ${studentName},</h2>
-          <p style="font-size: 16px; color: #34495e;">Great news! Your order <strong>#${shortOrderId}</strong> is now ready for pickup at the SHS Canteen.</p>
-          <p style="font-size: 16px; color: #34495e;">Please proceed to the claiming area and present your order number.</p>
-          <hr style="border: 0; border-top: 1px solid #eaeaea; margin: 20px 0;" />
-          <p style="font-size: 14px; color: #7f8c8d;">Thank you!</p>
-          <p style="font-size: 14px; color: #7f8c8d;"><strong>- SHS Canteen Team</strong></p>
-        </div>
-      `
+      service_id: process.env.EMAILJS_SERVICE_ID,
+      template_id: process.env.EMAILJS_TEMPLATE_ID,
+      user_id: process.env.EMAILJS_PUBLIC_KEY,
+      accessToken: process.env.EMAILJS_PRIVATE_KEY,
+      template_params: {
+        student_email: studentEmail,
+        student_name: studentName,
+        order_id: shortOrderId,
+        // any other variables you put in your EmailJS template using {{variable_name}}
+      }
     };
 
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'api-key': apiKey
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Brevo API Error: ${response.status} ${errorText}`);
+      throw new Error(`EmailJS API Error: ${response.status} ${errorText}`);
     }
 
-    console.log(`Email sent successfully via Brevo!`);
+    console.log(`Email sent successfully via EmailJS!`);
     return true;
   } catch (error) {
     console.error('Detailed Email Error:', error);
