@@ -152,7 +152,9 @@
             const user = JSON.parse(storedUser);
             const studentDisplay = document.getElementById('current-student');
             if (studentDisplay) {
-                studentDisplay.innerHTML = `<span>Welcome, <strong>${user.name}</strong></span> <button class="btn btn-sm btn-outline ml-2" id="student-logout-btn">Exit</button>`;
+                studentDisplay.innerHTML = `<span>Welcome, <strong>${user.name}</strong></span> 
+                <button class="btn btn-sm btn-outline ml-2" id="student-logout-btn">Exit</button>
+                <button class="btn btn-sm btn-gold ml-2" id="view-feedbacks-btn"><i class="fa-solid fa-star"></i> Feedbacks</button>`;
             }
 
             document.addEventListener('click', (e) => {
@@ -215,17 +217,18 @@
             generateStoreCards();
 
             // Setup Feedbacks Modal Logic
-            const viewFeedbacksBtn = document.getElementById('view-feedbacks-btn');
-            const closeFeedbacksBtn = document.getElementById('close-feedbacks-viewer');
-            const feedbacksModal = document.getElementById('feedbacks-viewer-modal');
-            const feedbacksContainer = document.getElementById('feedbacks-list-container');
+            // Use event delegation for the dynamically generated button
+            document.addEventListener('click', async (e) => {
+                const viewFeedbacksBtn = e.target.closest('#view-feedbacks-btn');
+                if (!viewFeedbacksBtn) return;
 
-            if (viewFeedbacksBtn && feedbacksModal) {
-                viewFeedbacksBtn.addEventListener('click', async () => {
+                const feedbacksModal = document.getElementById('feedbacks-viewer-modal');
+                const feedbacksContainer = document.getElementById('feedbacks-list-container');
+
+                if (feedbacksModal) {
                     feedbacksModal.classList.remove('hidden');
 
                     try {
-                        // Assuming window.config.apiUrl exists or fallback to the known base URL
                         const apiUrl = (window.config && window.config.apiUrl) ? window.config.apiUrl : 'https://shs-canteen.onrender.com/api';
                         const response = await fetch(`${apiUrl}/reviews`);
 
@@ -296,9 +299,11 @@
                             </div>
                         `;
                     }
-                });
-            }
+                }
+            });
 
+            const closeFeedbacksBtn = document.getElementById('close-feedbacks-viewer');
+            const feedbacksModal = document.getElementById('feedbacks-viewer-modal');
             if (closeFeedbacksBtn && feedbacksModal) {
                 closeFeedbacksBtn.addEventListener('click', () => {
                     feedbacksModal.classList.add('hidden');
