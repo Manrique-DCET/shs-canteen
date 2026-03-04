@@ -10,10 +10,12 @@ const sendFoodReadyEmail = async (studentEmail, orderId, studentName) => {
 
     const shortOrderId = orderId.substring(orderId.length - 6).toUpperCase();
 
+    const senderEmail = process.env.SENDER_EMAIL || "noreply@shscanteen.com";
+
     const payload = {
       sender: {
         name: "SHS Canteen",
-        email: "noreply@shscanteen.com" // You can change this to your actual email if needed
+        email: senderEmail // Must be a verified sender email in your Brevo account
       },
       to: [
         {
