@@ -98,6 +98,8 @@
             <div class="student-profile" id="current-student">
                 <span>Welcome, Student</span>
                 <button class="btn btn-sm btn-outline ml-2" id="student-logout-btn">Exit</button>
+                <button class="btn btn-sm btn-gold ml-2" id="view-feedbacks-btn"><i class="fa-solid fa-star"></i>
+                    Feedbacks</button>
             </div>
         </header>
 
@@ -108,6 +110,29 @@
                 <!-- Store Cards Will Be Injected Here -->
             </div>
         </main>
+    </div>
+
+    <!-- Feedbacks Viewer Modal -->
+    <div id="feedbacks-viewer-modal" class="modal-overlay hidden">
+        <div class="glass-card modal-content"
+            style="max-width: 600px; width: 90%; max-height: 80vh; display: flex; flex-direction: column;">
+            <div class="modal-header d-flex justify-content-between align-items-center mb-3">
+                <h3 class="m-0"><i class="fa-solid fa-comments text-gold"></i> Student Feedbacks</h3>
+                <button class="btn-close" id="close-feedbacks-viewer"
+                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="feedbacks-list-container"
+                style="flex: 1; overflow-y: auto; padding-right: 10px; display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Feedbacks injected here -->
+                <div class="text-center text-muted" style="padding: 2rem;">
+                    <i class="fa-solid fa-spinner fa-spin fa-2x mb-3 text-navy"></i>
+                    <p>Loading feedbacks...</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -178,7 +203,109 @@
         };
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', generateStoreCards);
+        document.addEventListener('DOMContentLoaded', () => {
+            generateStoreCards();
+
+            // Setup Feedbacks Modal Logic
+            const viewFeedbacksBtn = document.getElementById('view-feedbacks-btn');
+            const closeFeedbacksBtn = document.getElementById('close-feedbacks-viewer');
+            const feedbacksModal = document.getElementById('feedbacks-viewer-modal');
+            const feedbacksContainer = document.getElementById('feedbacks-list-container');
+
+            if (viewFeedbacksBtn && feedbacksModal) {
+                viewFeedbacksBtn.addEventListener('click', async () => {
+                    feedbacksModal.classList.remove('hidden');
+
+                    try {
+                        // Assuming window.config.apiUrl exists or fallback to the known base URL
+                        const apiUrl = (window.config && window.config.apiUrl) ? window.config.apiUrl : 'https://shs-canteen.onrender.com/api';
+                        const response = await fetch(`${apiUrl}/reviews`);
+
+                        if (!response.ok) throw new Error('Failed to fetch feedbacks');
+
+                        const reviews = await response.json();
+
+                        if (reviews.length === 0) {
+                            feedbacksContainer.innerHTML = `
+                                <div class="text-center text-muted" style="padding: 2rem;">
+                                    <i class="fa-regular fa-comment-dots fa-3x mb-3"></i>
+                                    <p>No feedbacks available yet.</p>
+                                </div>
+                            `;
+                            return;
+                        }
+
+                        // Render Feedbacks
+                        feedbacksContainer.innerHTML = reviews.map(review => {
+                            const date = new Date(review.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric', month: 'short', day: 'numeric'
+                            });
+
+                            // Generate Stars
+                            let starsHtml = '';
+                            const rating = parseInt(review.rating) || 5;
+                            for (let i = 1; i <= 5; i++) {
+                                if (i <= rating) {
+                                    starsHtml += '<i class="fa-solid fa-star text-gold" style="color: #fbbf24;"></i>';
+                                } else {
+                                    starsHtml += '<i class="fa-regular fa-star" style="color: #d1d5db;"></i>';
+                                }
+                            }
+
+                            // Determine Target (Store Name or specific product)
+                            let targetInfo = '';
+                            if (review.stallName) {
+                                targetInfo = `<span style="font-size: 0.85rem; background: var(--bg-main); padding: 0.2rem 0.5rem; border-radius: 4px; color: var(--uphsd-navy);"><i class="fa-solid fa-store"></i> ${review.stallName}</span>`;
+                            }
+
+                            return `
+                                <div class="feedback-card" style="background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(0,0,0,0.05); border-radius: 8px; padding: 1rem; text-align: left;">
+                                    <div class="d-flex justify-content-between align-items-start mb-2" style="display: flex; justify-content: space-between;">
+                                        <div>
+                                            <div style="font-weight: 600; color: var(--uphsd-navy);">
+                                                ${review.user && review.user.name ? review.user.name : 'Anonymous Student'}
+                                            </div>
+                                            <div class="stars" style="font-size: 0.9rem; margin-top: 2px;">
+                                                ${starsHtml}
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.8rem; color: #6b7280;">${date}</div>
+                                    </div>
+                                    <p style="margin: 0.5rem 0; color: var(--text-main); font-size: 0.95rem;">
+                                        "${review.comment || 'No comment provided.'}"
+                                    </p>
+                                    ${targetInfo ? `<div style="margin-top: 0.5rem; text-align: right;">${targetInfo}</div>` : ''}
+                                </div>
+                            `;
+                        }).join('');
+
+                    } catch (error) {
+                        console.error('Error loading feedbacks:', error);
+                        feedbacksContainer.innerHTML = `
+                            <div class="text-center text-danger" style="padding: 2rem;">
+                                <i class="fa-solid fa-triangle-exclamation fa-2x mb-3 text-danger"></i>
+                                <p>Failed to load feedbacks. Please try again later.</p>
+                            </div>
+                        `;
+                    }
+                });
+            }
+
+            if (closeFeedbacksBtn && feedbacksModal) {
+                closeFeedbacksBtn.addEventListener('click', () => {
+                    feedbacksModal.classList.add('hidden');
+                });
+            }
+
+            // Close on outside click
+            if (feedbacksModal) {
+                feedbacksModal.addEventListener('click', (e) => {
+                    if (e.target === feedbacksModal) {
+                        feedbacksModal.classList.add('hidden');
+                    }
+                });
+            }
+        });
     </script>
 </body>
 
